@@ -1,0 +1,13 @@
+{
+  # Mastering effects
+  :Mastering => [
+    # Useful to remove starting beats
+    [ :CutFirstSignal ],
+    # Normalization
+    [ :Normalize ],
+    # Volume correction, either in ratio (ie. '4/5') or in db (ie. -2db)
+    [ :VolCorrection, '-2db' ],
+    # Compression
+    [ :Compressor ]
+  ]
+}

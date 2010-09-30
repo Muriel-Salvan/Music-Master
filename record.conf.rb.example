@@ -1,0 +1,45 @@
+{
+
+  # Tracks that will be recorded during the same take
+  :Performs => [
+    [2, 4, 5],
+    [6, 8, 9],
+    [7],
+    [10]
+  ],
+
+  # Tracks that will be recorded alone
+  # Additional parameters are given to adjust their level with the Perform tracks
+  :Patches => {
+
+    1 => {
+      # Effects to apply once recorded
+      :Effects => [
+        {
+          :Name => 'GVerb'
+        }
+      ],
+      # Either use :VolCorrection or :VolCompareCuts
+      :VolCorrection => '1/4', # Can be also specified in db (ie. '-5db')
+      # Specify that we can record a sample of the Track with the reference and original volume, and cut the following range in this sample recording, to compute the volume correction to apply.
+      :VolCompareCuts => ['0.1s', '32s']
+    },
+
+    3 => {
+      # Effects to apply once recorded
+      :Effects => [
+        {
+          :Name => 'GVerb'
+        }
+      ],
+      # Either use :VolCorrection or :VolCompareCuts
+      :VolCorrection => '3db',
+      :VolCompareCuts => ['1s', '25s']
+    }
+
+  },
+
+  # Specify if there are some files to include in the Mix that don't need to be recorded
+  :WaveFiles => true
+
+}

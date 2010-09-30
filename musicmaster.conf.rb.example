@@ -1,0 +1,79 @@
+{
+
+  # Command line to run WSK tool
+  :WSKCmdLine => 'ruby -w -S WSK.rb',
+
+  # Command line to run Sample Rate Converter tool
+  :SRCCmdLine => '/path/to/ssrc/ssrc.exe',
+
+  # Record options
+  :Record => {
+
+    # Method returning the name of the next recorded file
+    :RecordedFileGetter => Proc.new do
+      next `ls -rt /path/to/recorded/files/*.wav | tail -1 | head -1`.chomp
+    end
+
+  },
+
+  # PrepareMix options
+  :PrepareMix => {
+
+    # Directory in which temporary files will be generated
+    :TempDir => 'PrepareMixTemp',
+
+    # Percentage of values added as a margin of the silence thresholds (arbitrary value)
+    :MarginSilenceThresholds => 0.1,
+
+    # Durations used for noise gates
+    # !!! Attack + Release should be < SilenceMin !!!
+    :NoiseGate_Attack => '0.1s',
+    :NoiseGate_Release => '0.1s',
+    :NoiseGate_SilenceMin => '1s'
+
+  },
+
+  # Mix options
+  :Mix => {
+
+    # Directory in which temporary files will be generated
+    :TempDir => 'MixTemp'
+
+  },
+
+  # Master options
+  :Master => {
+
+    # Directory in which files will be generated
+    :Dir => 'Master'
+
+  },
+
+  # Album options
+  :Album => {
+
+    # Directory in which temporary files will be generated
+    :TempDir => 'AlbumTemp',
+
+    # Directory in which files will be generated
+    :Dir => 'Album'
+
+  },
+
+  # Album delivery options
+  :AlbumDeliver => {
+
+    # Directory in which files will be generated
+    :Dir => 'AlbumDeliver'
+
+  },
+
+  # Single Track delivery options
+  :Deliver => {
+
+    # Directory in which files will be generated
+    :Dir => 'Deliver'
+
+  }
+
+}
