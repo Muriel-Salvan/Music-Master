@@ -84,12 +84,7 @@ module MusicMaster
         if (rError == nil)
           lAssignedTracks.size.times do |iIdxTrack|
             if (!lAssignedTracks.has_key?(iIdxTrack+1))
-              puts "Track #{iIdxTrack+1} is never recorded. Continue ? y='yes'"
-              lContinue = ($stdin.gets.chomp == 'y')
-              if (!lContinue)
-                rError = RuntimeError.new("Track #{iIdxTrack+1} is never recorded.")
-                break
-              end
+              logWarn "Track #{iIdxTrack+1} is never recorded."
             end
           end
         end
