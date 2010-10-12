@@ -72,18 +72,18 @@ module MusicMaster
                 lTryAgain = ($stdin.gets.chomp != 'y')
               end
               if (iTrackConf[:Effects] != nil)
-                applyEffects(iTrackConf[:Effects], "Patch.#{iIdxTrack}.wav")
+                MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.wav", $MusicMasterConf[:Record][:TempDir])
               end
               puts "===== Record Patch silence for track #{iIdxTrack} ====="
               record("Patch.#{iIdxTrack}.Silence.wav")
               if (iTrackConf[:Effects] != nil)
-                applyEffects(iTrackConf[:Effects], "Patch.#{iIdxTrack}.Silence.wav")
+                MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.Silence.wav", $MusicMasterConf[:Record][:TempDir])
               end
               if (iTrackConf[:VolCorrection] == nil)
                 puts "===== Record Patch volume preview for track #{iIdxTrack} ====="
                 record("Patch.#{iIdxTrack}.VolOriginal.wav")
                 if (iTrackConf[:Effects] != nil)
-                  applyEffects(iTrackConf[:Effects], "Patch.#{iIdxTrack}.VolOriginal.wav")
+                  MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.VolOriginal.wav", $MusicMasterConf[:Record][:TempDir])
                 end
               end
             end
@@ -102,32 +102,6 @@ module MusicMaster
       end
 
       return rErrorCode
-    end
-
-    # Apply given record effects on a wav file
-    #
-    # Parameters:
-    # * *iEffects* (<em>list<map<Symbol,Object>></em>): List of effects to apply
-    # * *iFileName* (_String_): File name to apply effects to
-    def applyEffects(iEffects, iFileName)
-      lFileNameNoExt = iFileName[0..-5]
-      iEffects.each_with_index do |iEffectInfo, iIdxEffect|
-        accessPlugin('RecordEffects', iEffectInfo[:Name]) do |ioActionPlugin|
-          # Save the file before using the plugin
-          lSave = true
-          lSaveFileName = "#{lFileNameNoExt}.Before_#{iIdxEffect}_#{iEffectInfo[:Name]}.wav"
-          if (File.exists?(lSaveFileName))
-            puts "!!! File #{lSaveFileName} already exists. Overwrite and apply effect ? [y='yes']"
-            lSave = ($stdin.gets.chomp == 'y')
-          end
-          if (lSave)
-            logInfo "Saving file #{iFileName} to #{lSaveFileName} ..."
-            FileUtils::cp(iFileName, lSaveFileName)
-            logInfo "===== Apply Effect #{iEffectInfo[:Name]} to #{iFileName} ====="
-            ioActionPlugin.execute(iFileName, iEffectInfo)
-          end
-        end
-      end
     end
 
     # Record into a given file

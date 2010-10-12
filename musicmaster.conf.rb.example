@@ -9,6 +9,9 @@
   # Record options
   :Record => {
 
+    # Directory in which temporary files will be generated
+    :TempDir => 'RecordTemp',
+
     # Method returning the name of the next recorded file
     :RecordedFileGetter => Proc.new do
       next `ls -rt /path/to/recorded/files/*.wav | tail -1 | head -1`.chomp

@@ -1,2 +1,1 @@
 * Add a Makefile generation procedure to ensure that modifying files will regenerate correct albums.
-* Add plugin support for Mastering processes (same way as Record plugins).

@@ -25,17 +25,14 @@ module MusicMaster
           # Find the last one
           lFinalMasterFileName = lMasterFiles.sort[-1]
           logInfo "Found final Master file from Track #{iTrackInfo[:TrackID]} version #{iTrackInfo[:Version]} in #{lFinalMasterFileName}"
-          lResultingFile = nil
           if (iTrackInfo[:AdditionalMastering] != nil)
             lMasterTempDir = "#{$MusicMasterConf[:Album][:TempDir]}/#{iTrackInfo[:TrackID]}.#{iTrackInfo[:Version]}"
             FileUtils::mkdir_p(lMasterTempDir)
-            lResultingFile = MusicMaster::applyMasteringProcesses(lFinalMasterFileName, iTrackInfo[:AdditionalMastering], lMasterTempDir)
-          else
-            lResultingFile = lFinalMasterFileName
+            MusicMaster::applyProcesses(lFinalMasterFileName, iTrackInfo[:AdditionalMastering], lMasterTempDir)
           end
           # Copy it
-          logInfo "Setting file #{iIdxTrack} for Track #{iTrackInfo[:TrackID]}"
-          FileUtils::cp(lResultingFile, "#{$MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav")
+          logInfo "Setting file #{iIdxTrack} for Track #{iTrackInfo[:TrackID]} from #{lFinalMasterFileName}"
+          FileUtils::cp(lFinalMasterFileName, "#{$MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav")
         end
       end
     end
@@ -52,6 +49,7 @@ elsif (!File.exists?(lConfFile))
   logErr "File #{lConfFile} does not exist."
   rErrorCode = 2
 else
+  MusicMaster::parsePlugins
   FileUtils::mkdir_p($MusicMasterConf[:Album][:Dir])
   FileUtils::mkdir_p($MusicMasterConf[:Album][:TempDir])
   lConf = nil

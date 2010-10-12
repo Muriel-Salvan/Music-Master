@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'MusicMaster/Common'
 require 'rUtilAnts/Logging'
 RUtilAnts::Logging::initializeLogging('', '')
@@ -13,12 +14,15 @@ module MusicMaster
   # Return:
   # * _String_: Name of the Wave file containing the result
   def self.execute(iConf, iWaveFile)
-    rWaveFileToProcess = iWaveFile
+    rWaveFileToProcess = "#{$MusicMasterConf[:Master][:Dir]}/#{File.basename(iWaveFile)}"
 
     # Execute each step of the mastering to the wave file
     if (iConf[:Mastering] != nil)
-      rWaveFileToProcess = self.applyMasteringProcesses(iWaveFile, iConf[:Mastering], $MusicMasterConf[:Master][:Dir])
+      self.applyProcesses(iWaveFile, iConf[:Mastering], $MusicMasterConf[:Master][:Dir])
     end
+    # Copy it as the Master one
+    logInfo 'Writing final Master file ...'
+    FileUtils::cp(iWaveFile, rWaveFileToProcess)
 
     return rWaveFileToProcess
   end
@@ -38,6 +42,7 @@ elsif (!File.exists?(lWaveFile))
   logErr "File #{lWaveFile} does not exist."
   rErrorCode = 3
 else
+  MusicMaster::parsePlugins
   FileUtils::mkdir_p($MusicMasterConf[:Master][:Dir])
   lConf = nil
   File.open(lConfFile, 'r') do |iFile|

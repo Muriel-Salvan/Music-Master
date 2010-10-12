@@ -27,7 +27,41 @@ module MusicMaster
   # Parse plugins
   def self.parsePlugins
     lLibDir = File.expand_path(File.dirname(__FILE__))
-    parsePluginsFromDir('RecordEffects', "#{lLibDir}/RecordEffects", 'MusicMaster::RecordEffects')
+    parsePluginsFromDir('Processes', "#{lLibDir}/Processes", 'MusicMaster::Processes')
+  end
+
+  # Apply given record effects on a Wave file.
+  # It modifies the given Wave file.
+  # It saves original and intermediate Wave files before modifications.
+  #
+  # Parameters:
+  # * *iEffects* (<em>list<map<Symbol,Object>></em>): List of effects to apply
+  # * *iFileName* (_String_): File name to apply effects to
+  # * *iDir* (_String_): The directory where temporary files are stored
+  def self.applyProcesses(iEffects, iFileName, iDir)
+    lFileNameNoExt = iFileName[0..-5]
+    iEffects.each_with_index do |iEffectInfo, iIdxEffect|
+      begin
+        accessPlugin('Processes', iEffectInfo[:Name]) do |ioActionPlugin|
+          # Save the file before using the plugin
+          lSave = true
+          lSaveFileName = "#{iDir}/#{lFileNameNoExt}.Before_#{iIdxEffect}_#{iEffectInfo[:Name]}.wav"
+          if (File.exists?(lSaveFileName))
+            puts "!!! File #{lSaveFileName} already exists. Overwrite and apply effect ? [y='yes']"
+            lSave = ($stdin.gets.chomp == 'y')
+          end
+          if (lSave)
+            logInfo "Saving file #{iFileName} to #{lSaveFileName} ..."
+            FileUtils::mv(iFileName, lSaveFileName)
+            logInfo "===== Apply Effect #{iEffectInfo[:Name]} to #{iFileName} ====="
+            ioActionPlugin.execute(lSaveFileName, iFileName, iDir, iEffectInfo.clone.delete_if{|iKey, iValue| next (iKey == :Name)})
+          end
+        end
+      rescue Exception
+        logErr "An error occurred while processing #{iFileName} with process #{iEffectInfo[:Name]}: #{$!}."
+        raise
+      end
+    end
   end
 
   # Read record configuration.
@@ -150,87 +184,6 @@ module MusicMaster
       lCmd = "#{$MusicMasterConf[:SRCCmdLine]} #{lTranslatedParams.join(' ')} \"#{iSrcFile}\" \"#{iDstFile}\""
       logInfo "=> #{lCmd}"
       system(lCmd)
-    end
-  end
-
-  # Apply a list of Mastering processes to a file
-  #
-  # Parameters:
-  # * *iWaveFileName* (_String_): Name of the wave file
-  # * *iMasteringProcesses* (<em>list<[Symbol,...]></em>): List of mastering processes with their parameters
-  # * *iDir* (_String_): Directory to be used to store generated files
-  # Return:
-  # * _String_: Name of the resulting file
-  def self.applyMasteringProcesses(iWaveFileName, iMasteringProcesses, iDir)
-    rWaveFileToProcess = iWaveFileName
-
-    lRealBaseName = File.basename(iWaveFileName)[0..-5]
-    iMasteringProcesses.each_with_index do |iProcessInfo, iIdxProcess|
-      lSymProcess = iProcessInfo[0]
-      lNewFile = "#{iDir}/#{lRealBaseName}_#{iIdxProcess}_#{lSymProcess.to_s}.wav"
-      self.process(rWaveFileToProcess, lNewFile, lSymProcess, iProcessInfo[1..-1], iDir)
-      rWaveFileToProcess = lNewFile
-    end
-
-    return rWaveFileToProcess
-  end
-
-  # Process a wave file with a mastering process
-  #
-  # Parameters:
-  # * *iInputWaveFile* (_String_): Wave file to process
-  # * *iOutputWaveFile* (_String_): Wave file to be written
-  # * *iSymProcess* (_Symbol_): Symbol identifying the process
-  # * *iProcessParams* (<em>list<Object></em>): The process parameters
-  # * *iDir* (_String_): Directory to be used to store generated files
-  def self.process(iInputWaveFile, iOutputWaveFile, iSymProcess, iProcessParams, iDir)
-    if (File.exists?(iOutputWaveFile))
-      logWarn "File #{iOutputWaveFile} already exists. Will not overwrite it."
-    else
-      case iSymProcess
-      when :CutFirstSignal
-        wsk(iInputWaveFile, iOutputWaveFile, 'CutFirstSignal', "--silencethreshold 0 --noisefft none --silencemin \"#{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]}\"")
-      when :Normalize
-        # First, analyze
-        lAnalyzeResultFileName = "#{iDir}/#{File.basename(iInputWaveFile)}.analyze"
-        if (File.exists?(lAnalyzeResultFileName))
-          logWarn "File #{lAnalyzeResultFileName} already exists. Will not overwrite it."
-        else
-          wsk(iInputWaveFile, "#{iDir}/Dummy.wav", 'Analyze')
-          File.unlink("#{iDir}/Dummy.wav")
-          FileUtils::mv('analyze.result', lAnalyzeResultFileName)
-        end
-        lAnalyzeResult = nil
-        File.open(lAnalyzeResultFileName, 'rb') do |iFile|
-          lAnalyzeResult = Marshal.load(iFile.read)
-        end
-        lMaxDataValue = lAnalyzeResult[:MaxValues].sort[-1]
-        lMinDataValue = lAnalyzeResult[:MinValues].sort[0]
-        lMaxPossibleValue = (2**(lAnalyzeResult[:SampleSize]-1)) - 1
-        lMinPossibleValue = -(2**(lAnalyzeResult[:SampleSize]-1))
-        lCoeffNormalizeMax = Rational(lMaxPossibleValue, lMaxDataValue)
-        lCoeffNormalizeMin = Rational(lMinPossibleValue, lMinDataValue)
-        lCoeff = lCoeffNormalizeMax
-        if (lCoeffNormalizeMin < lCoeff)
-          lCoeff = lCoeffNormalizeMin
-        end
-        logInfo "Maximal value: #{lMaxDataValue}/#{lMaxPossibleValue}. Minimal value: #{lMinDataValue}/#{lMinPossibleValue}. Volume correction: #{lCoeff}."
-        wsk(iInputWaveFile, iOutputWaveFile, 'Multiply', "--coeff \"#{lCoeff.numerator}/#{lCoeff.denominator}\"")
-      when :VolCorrection
-        wsk(iInputWaveFile, iOutputWaveFile, 'Multiply', "--coeff \"#{iProcessParams[0]}\"")
-      when :Compressor
-        logInfo "Copying #{iInputWaveFile} => #{iOutputWaveFile} ..."
-        FileUtils::cp(iInputWaveFile, iOutputWaveFile)
-        puts "Apply Compressor on file #{iOutputWaveFile}"
-        puts 'Press Enter when done ...'
-        $stdin.gets
-      when :AddEndingSilence
-        wsk(iInputWaveFile, iOutputWaveFile, 'SilenceInserter', "--silence \"#{iProcessParams[0]}\" --endoffile 1")
-      when :AddBeginningSilence
-        wsk(iInputWaveFile, iOutputWaveFile, 'SilenceInserter', "--silence \"#{iProcessParams[0]}\" --endoffile 0")
-      else
-        logErr "Unknown Mastering process: #{iSymProcess.to_s}"
-      end
     end
   end
 

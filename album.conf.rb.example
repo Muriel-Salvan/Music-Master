@@ -20,12 +20,11 @@
       :Version => '0.0.1.20100924',
       # Additional steps for Mastering the Track in the album's scope
       :AdditionalMastering => [
-        [ :CutFirstSignal ],
-        [ :Normalize ],
-        [ :VolCorrection, '-2db' ],
-        [ :Compressor ],
-        [ :AddBeginningSilence, '1.2s' ],
-        [ :AddEndingSilence, '1.2s' ]
+        { :Name => 'CutFirstSignal' },
+        { :Name => 'Normalize' },
+        { :Name => 'VolCorrection', :Factor => '-2db' },
+        { :Name => 'Compressor' },
+        { :Name => 'AddSilence', :Begin => '1.2s', :End => '2.4s' }
       ]
     },
 
@@ -33,11 +32,11 @@
       :TrackID => 'Track114',
       :Version => '0.0.1.20100924',
       :AdditionalMastering => [
-        [ :CutFirstSignal ],
-        [ :Normalize ],
-        [ :VolCorrection, '-2db' ],
-        [ :Compressor ],
-        [ :AddEndingSilence, '1.2s' ]
+        { :Name => 'CutFirstSignal' },
+        { :Name => 'Normalize' },
+        { :Name => 'VolCorrection', :Factor => '-2db' },
+        { :Name => 'Compressor' },
+        { :Name => 'AddSilence', :Begin => '1.2s', :End => '1s' }
       ]
     }
   ],
