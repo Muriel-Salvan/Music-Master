@@ -4,6 +4,9 @@ module MusicMaster
 
     class VolCorrection
 
+      # Parameters of this process:
+      # * *:Factor* (_String_): The volume correction factor, either in ratio ('3/4') or db ('-2db')
+
       # Execute the process
       #
       # Parameters:

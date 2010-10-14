@@ -89,7 +89,7 @@ module MusicMaster
           # The list of operations to perform
           # list< [ String, String ] >
           lOperations = [
-            [ 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]} --noisefft \"#{lPerformFFTProfile}\"" ]
+            [ 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{lPerformFFTProfile}\"" ]
           ]
           if (lOffset)
             logInfo "DC offset to correct: #{lDCOffsets.join(', ')}"
@@ -97,7 +97,7 @@ module MusicMaster
           else
             logInfo 'No DC offset to correct'
           end
-          lOperations << [ 'NoiseGate', "--silencethreshold \"#{lLstStrPerformSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:PrepareMix][:NoiseGate_Attack]} --release #{$MusicMasterConf[:PrepareMix][:NoiseGate_Release]} --silencemin #{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]} --noisefft \"#{lPerformFFTProfile}\"" ]
+          lOperations << [ 'NoiseGate', "--silencethreshold \"#{lLstStrPerformSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:NoiseGate][:Attack]} --release #{$MusicMasterConf[:NoiseGate][:Release]} --silencemin #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{lPerformFFTProfile}\"" ]
           # Register this file
           rConfig[:MixFiles] << {
             :FileName => lFileName,
@@ -168,7 +168,7 @@ module MusicMaster
           # The list of operations to perform
           # list< [ String, String ] >
           lOperations = [
-            [ 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]} --noisefft \"#{lPatchFFTProfile}\"" ]
+            [ 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{lPatchFFTProfile}\"" ]
           ]
           if (lOffset)
             logInfo "DC offset to correct: #{lDCOffsets.join(', ')}"
@@ -176,7 +176,7 @@ module MusicMaster
           else
             logInfo 'No DC offset to correct'
           end
-          lOperations << [ 'NoiseGate', "--silencethreshold \"#{lLstStrPatchSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:PrepareMix][:NoiseGate_Attack]} --release #{$MusicMasterConf[:PrepareMix][:NoiseGate_Release]} --silencemin #{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]} --noisefft \"#{lPatchFFTProfile}\"" ]
+          lOperations << [ 'NoiseGate', "--silencethreshold \"#{lLstStrPatchSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:NoiseGate][:Attack]} --release #{$MusicMasterConf[:NoiseGate][:Release]} --silencemin #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{lPatchFFTProfile}\"" ]
           if (lVolCorrection != nil)
             lOperations << [ 'Multiply', "--coeff \"#{lVolCorrection}\"" ]
           end
@@ -380,7 +380,7 @@ module MusicMaster
     if (File.exists?(rFileName_NoiseGate))
       logInfo "File #{rFileName_NoiseGate} already exists. Skipping its generation."
     else
-      wsk(lFileName_DCOffset, rFileName_NoiseGate, 'NoiseGate', "--silencethreshold \"#{iStrSilenceThresholds}\" --attack #{$MusicMasterConf[:PrepareMix][:NoiseGate_Attack]} --release #{$MusicMasterConf[:PrepareMix][:NoiseGate_Release]} --silencemin #{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]} --noisefft \"#{iSilenceFFTProfile}\"")
+      wsk(lFileName_DCOffset, rFileName_NoiseGate, 'NoiseGate', "--silencethreshold \"#{iStrSilenceThresholds}\" --attack #{$MusicMasterConf[:NoiseGate][:Attack]} --release #{$MusicMasterConf[:NoiseGate][:Release]} --silencemin #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{iSilenceFFTProfile}\"")
     end
 
     return rFileName_NoiseGate
@@ -403,8 +403,8 @@ else
     FileUtils::mkdir_p($MusicMasterConf[:PrepareMix][:TempDir])
     lConfig = MusicMaster::getConfig(lRecordConf)
     require 'pp'
-    File.open(lConfigFile, 'w') do |iFile|
-      iFile.write(lConfig.pretty_inspect)
+    File.open(lConfigFile, 'w') do |oFile|
+      oFile.write(lConfig.pretty_inspect)
     end
     logInfo "===== config saved in #{lConfigFile}"
   else

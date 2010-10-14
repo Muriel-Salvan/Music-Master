@@ -28,12 +28,6 @@
     # Percentage of values added as a margin of the silence thresholds (arbitrary value)
     :MarginSilenceThresholds => 0.1,
 
-    # Durations used for noise gates
-    # !!! Attack + Release should be < SilenceMin !!!
-    :NoiseGate_Attack => '0.1s',
-    :NoiseGate_Release => '0.1s',
-    :NoiseGate_SilenceMin => '1s'
-
   },
 
   # Mix options
@@ -76,6 +70,24 @@
 
     # Directory in which files will be generated
     :Dir => 'Deliver'
+
+  },
+
+  # Options for NoiseGate processes
+  :NoiseGate => {
+
+    # Durations used for noise gates
+    # !!! Attack + Release should be < SilenceMin !!!
+    :Attack => '0.1s',
+    :Release => '0.1s',
+    :SilenceMin => '1s'
+
+  },
+
+  # Options for Compressor processes
+  :Compressor => {
+
+    :Interval => '0.1s'
 
   }
 
