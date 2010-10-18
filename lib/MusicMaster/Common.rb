@@ -26,6 +26,8 @@ module MusicMaster
 
   # Parse plugins
   def self.parsePlugins
+    require 'rUtilAnts/Plugins'
+    RUtilAnts::Plugins::initializePlugins
     lLibDir = File.expand_path(File.dirname(__FILE__))
     parsePluginsFromDir('Processes', "#{lLibDir}/Processes", 'MusicMaster::Processes')
   end
@@ -39,7 +41,7 @@ module MusicMaster
   # * *iFileName* (_String_): File name to apply effects to
   # * *iDir* (_String_): The directory where temporary files are stored
   def self.applyProcesses(iEffects, iFileName, iDir)
-    lFileNameNoExt = iFileName[0..-5]
+    lFileNameNoExt = File.basename(iFileName[0..-5])
     iEffects.each_with_index do |iEffectInfo, iIdxEffect|
       begin
         accessPlugin('Processes', iEffectInfo[:Name]) do |ioActionPlugin|

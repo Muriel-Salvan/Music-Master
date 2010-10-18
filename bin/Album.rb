@@ -28,7 +28,7 @@ module MusicMaster
           if (iTrackInfo[:AdditionalMastering] != nil)
             lMasterTempDir = "#{$MusicMasterConf[:Album][:TempDir]}/#{iTrackInfo[:TrackID]}.#{iTrackInfo[:Version]}"
             FileUtils::mkdir_p(lMasterTempDir)
-            MusicMaster::applyProcesses(lFinalMasterFileName, iTrackInfo[:AdditionalMastering], lMasterTempDir)
+            MusicMaster::applyProcesses(iTrackInfo[:AdditionalMastering], lFinalMasterFileName, lMasterTempDir)
           end
           # Copy it
           logInfo "Setting file #{iIdxTrack} for Track #{iTrackInfo[:TrackID]} from #{lFinalMasterFileName}"

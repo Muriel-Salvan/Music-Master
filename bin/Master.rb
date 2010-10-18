@@ -18,7 +18,7 @@ module MusicMaster
 
     # Execute each step of the mastering to the wave file
     if (iConf[:Mastering] != nil)
-      self.applyProcesses(iWaveFile, iConf[:Mastering], $MusicMasterConf[:Master][:Dir])
+      self.applyProcesses(iConf[:Mastering], iWaveFile, $MusicMasterConf[:Master][:Dir])
     end
     # Copy it as the Master one
     logInfo 'Writing final Master file ...'

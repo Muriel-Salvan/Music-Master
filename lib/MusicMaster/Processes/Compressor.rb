@@ -64,7 +64,7 @@ module MusicMaster
           end
 
           # Create the Compressor's function based on the parameters
-          require 'WSK/Functions'
+          require 'WSK/Common'
           lCompressorFunction = WSK::Functions::Function.new
           if (lDBUnits)
             lCompressorFunction.set( {
@@ -118,7 +118,7 @@ module MusicMaster
             end
 
             # Save the volume transformation file
-            lDiffProfileFunction.saveToFile(lTempVolTransformFile)
+            lDiffProfileFunction.writeToFile(lTempVolTransformFile)
           end
 
           # Apply the volume transformation to the Wave file

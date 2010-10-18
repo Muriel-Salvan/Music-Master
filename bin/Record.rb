@@ -1,7 +1,5 @@
 require 'fileutils'
 require 'optparse'
-require 'rUtilAnts/Plugins'
-RUtilAnts::Plugins::initializePlugins
 require 'rUtilAnts/Logging'
 RUtilAnts::Logging::initializeLogging('', '')
 require 'MusicMaster/Common'
