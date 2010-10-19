@@ -9,7 +9,7 @@ module MusicMaster
       include WSK::Common
 
       # -Infinity
-      MINUS_INFINITY = -1.0/0.0
+      MINUS_INFINITY = BigDecimal('-Infinity')
 
       # Parameters of this process:
       # * *:DBUnits* (_Boolean_): Are units in DB format ? [optional = false]
@@ -106,7 +106,7 @@ module MusicMaster
               ]
             } )
           end
-          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].inspect}"
+          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ p[0].to_f, p[1].to_f ] }.inspect}"
 
           # Compute the volume transformation function based on the profile function and the Compressor's parameters
           lTempVolTransformFile = "#{iTempDir}/#{File.basename(iInputFileName)[0..-5]}.VolumeFct.rb"
