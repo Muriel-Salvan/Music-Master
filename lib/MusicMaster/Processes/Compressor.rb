@@ -17,8 +17,10 @@ module MusicMaster
       # * *:Ratio* (_Float_): Compression ratio to apply above threshold.
       # * *:AttackDuration* (_String_): The attack duration (either in seconds or in samples)
       # * *:AttackDamping* (_String_): The attack damping value in the duration previously defined (in DB if :DBUnit is true, else in a [0..1] scale). The compressor will never attack more than :AttackDamping values during a duration of :AttackDuration.
+      # * *:AttackLookAhead* (_Boolean_): Is the attack to be forecast before it happens ?
       # * *:ReleaseDuration* (_String_): The release duration (either in seconds or in samples)
       # * *:ReleaseDamping* (_String_): The release damping value in the duration previously defined (in DB if :DBUnit is true, else in a [0..1] scale). The compressor will never release more than :ReleaseDamping values during a duration of :ReleaseDuration.
+      # * *:ReleaseLookAhead* (_Boolean_): Is the attack to be forecast before it happens ?
 
       # Execute the process
       #
@@ -152,7 +154,31 @@ module MusicMaster
               lAttackSlope = -lAttackSlope
               lReleaseSlope = -lReleaseSlope
             end
-            lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
+            # Take care of look-aheads
+            if ((iParams[:AttackLookAhead] == true) or
+                (iParams[:ReleaseLookAhead] == true))
+              # Look-Aheads are implemented by applying damping on the reverted function
+              lDiffProfileFunction.invertAbscisses
+              if (iParams[:AttackLookAhead] == false)
+                lDiffProfileFunction.applyDamping(nil, -lReleaseSlope)
+              elsif (iParams[:ReleaseLookAhead] == false)
+                lDiffProfileFunction.applyDamping(lAttackSlope, nil)
+              else
+                lDiffProfileFunction.applyDamping(lAttackSlope, -lReleaseSlope)
+              end
+              lDiffProfileFunction.invertAbscisses
+            end
+            if (iParams[:AttackLookAhead] == true)
+              if (iParams[:ReleaseLookAhead] == false)
+                lDiffProfileFunction.applyDamping(lReleaseSlope, nil)
+              end
+            elsif (iParams[:ReleaseLookAhead] == true)
+              if (iParams[:AttackLookAhead] == false)
+                lDiffProfileFunction.applyDamping(nil, -lAttackSlope)
+              end
+            else
+              lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
+            end
 
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
