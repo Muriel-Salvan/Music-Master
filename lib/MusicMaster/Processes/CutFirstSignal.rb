@@ -12,7 +12,7 @@ module MusicMaster
       # * *iTempDir* (_String_): Temporary directory that can be used
       # * *iParams* (<em>map<Symbol,Object></em>): Parameters
       def execute(iInputFileName, iOutputFileName, iTempDir, iParams)
-        MusicMaster::wsk(iInputFileName, iOutputFileName, 'CutFirstSignal', "--silencethreshold 0 --noisefft none --silencemin \"#{$MusicMasterConf[:PrepareMix][:NoiseGate_SilenceMin]}\"")
+        MusicMaster::wsk(iInputFileName, iOutputFileName, 'CutFirstSignal', "--silencethreshold 0 --noisefft none --silencemin \"#{$MusicMasterConf[:NoiseGate][:SilenceMin]}\"")
       end
 
     end
