@@ -15,14 +15,13 @@ module MusicMaster
   # * _String_: Name of the Wave file containing the result
   def self.execute(iConf, iWaveFile)
     rWaveFileToProcess = "#{$MusicMasterConf[:Master][:Dir]}/#{File.basename(iWaveFile)}"
-
+    
+    logInfo 'Copying Master file ...'
+    FileUtils::cp(iWaveFile, rWaveFileToProcess)
     # Execute each step of the mastering to the wave file
     if (iConf[:Mastering] != nil)
-      self.applyProcesses(iConf[:Mastering], iWaveFile, $MusicMasterConf[:Master][:Dir])
+      self.applyProcesses(iConf[:Mastering], rWaveFileToProcess, $MusicMasterConf[:Master][:Dir])
     end
-    # Copy it as the Master one
-    logInfo 'Writing final Master file ...'
-    FileUtils::cp(iWaveFile, rWaveFileToProcess)
 
     return rWaveFileToProcess
   end

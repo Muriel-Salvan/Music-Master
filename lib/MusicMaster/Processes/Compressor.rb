@@ -80,20 +80,25 @@ module MusicMaster
             end
           end
 
+          # Arbitrary value
+          # TODO: Find a way to set it to a realistic value
+          lNbrDigitsLogPrecision = 10
+          
           # Create the Compressor's function based on the parameters
           # Minimal value represented in DB.
           # This value will be used to replace -Infinity
           lMinimalDBValue = nil
           lCompressorFunction = WSK::Functions::Function.new
+          lBDThreshold = BigDecimal(iParams[:Threshold].to_s)
           if (lDBUnits)
             # The minimal DB value is the smallest ratio possible for RMS values of this file (1/2^(BPS-1)) converted in DB and minus 1 to not mix it with the ratio 1/2^(BPS-1)
-            lMinimalDBValue = val2db(1, 2**(lHeader.NbrBitsPerSample-1))[0] - 1
+            lMinimalDBValue = lCompressorFunction.bdVal2db(BigDecimal('1'), BigDecimal('2')**(lHeader.NbrBitsPerSample-1), lNbrDigitsLogPrecision) - 1
             lCompressorFunction.set( {
               :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
               :Points => [
                 [lMinimalDBValue, lMinimalDBValue],
-                [iParams[:Threshold], iParams[:Threshold]],
-                [0, iParams[:Threshold] - Float(iParams[:Threshold])/iParams[:Ratio] ]
+                [lBDThreshold, lBDThreshold],
+                [0, lBDThreshold - lBDThreshold/BigDecimal(iParams[:Ratio].to_s) ]
               ]
             } )
           else
@@ -101,12 +106,12 @@ module MusicMaster
               :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
               :Points => [
                 [0, 0],
-                [iParams[:Threshold], iParams[:Threshold]],
-                [1, iParams[:Threshold] + (1.0-iParams[:Threshold])/iParams[:Ratio] ]
+                [lBDThreshold, lBDThreshold],
+                [1, lBDThreshold + (BigDecimal('1')-lBDThreshold)/BigDecimal(iParams[:Ratio].to_s) ]
               ]
             } )
           end
-          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ p[0].to_f, p[1].to_f ] }.inspect}"
+          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ p[0].to_s('F'), p[1].to_s('F') ] }.inspect}"
 
           # Compute the volume transformation function based on the profile function and the Compressor's parameters
           lTempVolTransformFile = "#{iTempDir}/#{File.basename(iInputFileName)[0..-5]}.VolumeFct.rb"
@@ -118,7 +123,7 @@ module MusicMaster
             lProfileFunction.readFromFile(lTempVolProfileFile)
             if (lDBUnits)
               # Convert the Profile function in DB units
-              lProfileFunction.convertToDB(1)
+              lProfileFunction.convertToDB(1, lNbrDigitsLogPrecision)
               # Replace -Infinity with lMinimalDBValue
               lProfileFunction.functionData[:Points].each do |ioPoint|
                 if (ioPoint[1] == MINUS_INFINITY)
@@ -126,6 +131,8 @@ module MusicMaster
                 end
               end
             end
+            
+            #lProfileFunction.writeToFile('ProfileDB.fct.rb')
 
             # Clone the profile function before applying the map
             lNewProfileFunction = WSK::Functions::Function.new
@@ -133,6 +140,8 @@ module MusicMaster
             
             # Transform the Profile function with the Compressor function
             lNewProfileFunction.applyMapFunction(lCompressorFunction)
+
+            #lNewProfileFunction.writeToFile('NewProfileDB.fct.rb')
 
             # The difference of the functions will give the volume transformation profile
             lDiffProfileFunction = WSK::Functions::Function.new
@@ -145,11 +154,13 @@ module MusicMaster
               lDiffProfileFunction.divideByFunction(lProfileFunction)
             end
 
+            #lDiffProfileFunction.writeToFile('RawDiffProfileDB.fct.rb')
+
             # Apply damping for attack and release times
-            lAttackDuration = readDuration(iParams[:AttackDuration], lHeader.SampleRate)
-            lAttackSlope = Float(iParams[:AttackDamping])/Float(lAttackDuration)
-            lReleaseDuration = readDuration(iParams[:ReleaseDuration], lHeader.SampleRate)
-            lReleaseSlope = Float(iParams[:ReleaseDamping])/Float(lReleaseDuration)
+            lAttackDuration = BigDecimal(readDuration(iParams[:AttackDuration], lHeader.SampleRate).to_s)
+            lAttackSlope = BigDecimal(iParams[:AttackDamping].to_s)/lAttackDuration
+            lReleaseDuration = BigDecimal(readDuration(iParams[:ReleaseDuration], lHeader.SampleRate).to_s)
+            lReleaseSlope = BigDecimal(iParams[:ReleaseDamping].to_s)/lReleaseDuration
             if (lDBUnits)
               lAttackSlope = -lAttackSlope
               lReleaseSlope = -lReleaseSlope
@@ -179,6 +190,25 @@ module MusicMaster
             else
               lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
             end
+            
+            #lDiffProfileFunction.writeToFile('DampedDiffProfileDB.fct.rb')
+            
+            # Round the function for the following reasons:
+            # * to then remove glitches smaller than acceptable (we will need to compare exact values)
+            # * BigDecimal#to_f method has bug with some extreme numbers (a 2424 digits number with exponent -411 gives a float with exponent +308), and to_f is used in the C code to apply volume fonction.
+            lMaxValue = BigDecimal('2')**(lHeader.NbrBitsPerSample-1)
+            lSmallestDiffValue = BigDecimal('1')/lMaxValue
+            if (lDBUnits)
+              lSmallestDiffValue = lCompressorFunction.bdVal2db(lMaxValue - lSmallestDiffValue, lMaxValue, lNbrDigitsLogPrecision)
+            end
+            lRoundExponentPrecision = 2-lSmallestDiffValue.exponent
+            logInfo "Precision set for rounding function: #{lRoundExponentPrecision}"
+            lDiffProfileFunction.roundToPrecision(BigDecimal('1'), BigDecimal('10')**lRoundExponentPrecision)
+
+            #lDiffProfileFunction.writeToFile('RoundedDiffProfileDB.fct.rb')
+            
+            # Eliminate glitches in the function (kind of smooth)
+            # TODO
 
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
