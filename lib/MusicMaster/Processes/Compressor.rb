@@ -21,6 +21,7 @@ module MusicMaster
       # * *:ReleaseDuration* (_String_): The release duration (either in seconds or in samples)
       # * *:ReleaseDamping* (_String_): The release damping value in the duration previously defined (in DB if :DBUnit is true, else in a [0..1] scale). The compressor will never release more than :ReleaseDamping values during a duration of :ReleaseDuration.
       # * *:ReleaseLookAhead* (_Boolean_): Is the attack to be forecast before it happens ?
+      # * *:MinChangeDuration* (_String_): The minimal duration a change in volume should have (either in seconds or in samples)
 
       # Execute the process
       #
@@ -193,8 +194,13 @@ module MusicMaster
             
             #lDiffProfileFunction.writeToFile('DampedDiffProfileDB.fct.rb')
             
+            # Eliminate glitches in the function.
+            # This is done by deleting intermediate abscisses that are too close to each other
+            lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration]).to_s))
+
+            #lDiffProfileFunction.writeToFile('SmoothedDiffProfileDB.fct.rb')
+
             # Round the function for the following reasons:
-            # * to then remove glitches smaller than acceptable (we will need to compare exact values)
             # * BigDecimal#to_f method has bug with some extreme numbers (a 2424 digits number with exponent -411 gives a float with exponent +308), and to_f is used in the C code to apply volume fonction.
             lMaxValue = BigDecimal('2')**(lHeader.NbrBitsPerSample-1)
             lSmallestDiffValue = BigDecimal('1')/lMaxValue
@@ -207,9 +213,6 @@ module MusicMaster
 
             #lDiffProfileFunction.writeToFile('RoundedDiffProfileDB.fct.rb')
             
-            # Eliminate glitches in the function (kind of smooth)
-            # TODO
-
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
           end
