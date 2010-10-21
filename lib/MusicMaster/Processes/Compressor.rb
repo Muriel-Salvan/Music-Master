@@ -141,7 +141,7 @@ module MusicMaster
             lNewProfileFunction.set(lProfileFunction.functionData.clone)
             
             # Transform the Profile function with the Compressor function
-            #lNewProfileFunction.applyMapFunction(lCompressorFunction)
+            lNewProfileFunction.applyMapFunction(lCompressorFunction)
 
             #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits, iTempDir)
 
