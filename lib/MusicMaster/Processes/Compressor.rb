@@ -196,7 +196,7 @@ module MusicMaster
             
             # Eliminate glitches in the function.
             # This is done by deleting intermediate abscisses that are too close to each other
-            lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration]).to_s))
+            lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate).to_s))
 
             #lDiffProfileFunction.writeToFile('SmoothedDiffProfileDB.fct.rb')
 
