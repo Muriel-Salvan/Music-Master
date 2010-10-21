@@ -6,11 +6,6 @@ module MusicMaster
 
     class Compressor
       
-      include WSK::Common
-
-      # -Infinity
-      MINUS_INFINITY = BigDecimal('-Infinity')
-
       # Parameters of this process:
       # * *:DBUnits* (_Boolean_): Are units in DB format ? [optional = false]
       # * *:Threshold* (_Float_): The threshold below which there is no compression (in DB if :DBUnit is true, else in a [0..1] scale)
@@ -23,6 +18,11 @@ module MusicMaster
       # * *:ReleaseLookAhead* (_Boolean_): Is the attack to be forecast before it happens ?
       # * *:MinChangeDuration* (_String_): The minimal duration a change in volume should have (either in seconds or in samples)
       # * *:RMSRatio* (_Float_): Ratio of RMS vs Peak level measurement used when profiling Wave files volumes. 0.0 = Use only Peak level. 1.0 = Use only RMS level. Other values in-between will produce a mix of both.
+
+      include WSK::Common
+
+      # -Infinity
+      MINUS_INFINITY = BigDecimal('-Infinity')
 
       # Execute the process
       #
@@ -141,7 +141,7 @@ module MusicMaster
             lNewProfileFunction.set(lProfileFunction.functionData.clone)
             
             # Transform the Profile function with the Compressor function
-            lNewProfileFunction.applyMapFunction(lCompressorFunction)
+            #lNewProfileFunction.applyMapFunction(lCompressorFunction)
 
             #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits, iTempDir)
 
