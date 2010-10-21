@@ -87,6 +87,7 @@
   # Options for Compressor processes
   :Compressor => {
 
+    # Interval used to measure volume
     :Interval => '0.1s'
 
   }

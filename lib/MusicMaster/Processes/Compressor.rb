@@ -22,6 +22,7 @@ module MusicMaster
       # * *:ReleaseDamping* (_String_): The release damping value in the duration previously defined (in DB if :DBUnit is true, else in a [0..1] scale). The compressor will never release more than :ReleaseDamping values during a duration of :ReleaseDuration.
       # * *:ReleaseLookAhead* (_Boolean_): Is the attack to be forecast before it happens ?
       # * *:MinChangeDuration* (_String_): The minimal duration a change in volume should have (either in seconds or in samples)
+      # * *:RMSRatio* (_Float_): Ratio of RMS vs Peak level measurement used when profiling Wave files volumes. 0.0 = Use only Peak level. 1.0 = Use only RMS level. Other values in-between will produce a mix of both.
 
       # Execute the process
       #
@@ -68,7 +69,7 @@ module MusicMaster
           else
             lTempWaveFile = "#{iTempDir}/Dummy.wav"
             # Get the volume profile
-            MusicMaster::wsk(iInputFileName, lTempWaveFile, 'VolumeProfile', "--function \"#{lTempVolProfileFile}\" --begin 0 --end -1 --interval \"#{$MusicMasterConf[:Compressor][:Interval]}\"")
+            MusicMaster::wsk(iInputFileName, lTempWaveFile, 'VolumeProfile', "--function \"#{lTempVolProfileFile}\" --begin 0 --end -1 --interval \"#{$MusicMasterConf[:Compressor][:Interval]}\" --rmsratio #{iParams[:RMSRatio]}")
             File::unlink(lTempWaveFile)
           end
 
