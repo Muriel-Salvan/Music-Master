@@ -134,7 +134,7 @@ module MusicMaster
               end
             end
             
-            #dumpDebugFct(iInputFileName, lProfileFunction, 'ProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lProfileFunction, 'ProfileDB', lDBUnits, iTempDir)
 
             # Clone the profile function before applying the map
             lNewProfileFunction = WSK::Functions::Function.new
@@ -143,7 +143,7 @@ module MusicMaster
             # Transform the Profile function with the Compressor function
             lNewProfileFunction.applyMapFunction(lCompressorFunction)
 
-            #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits, iTempDir)
 
             # The difference of the functions will give the volume transformation profile
             lDiffProfileFunction = WSK::Functions::Function.new
@@ -156,7 +156,7 @@ module MusicMaster
               lDiffProfileFunction.divideByFunction(lProfileFunction)
             end
 
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits, iTempDir)
 
             # Apply damping for attack and release times
             lAttackDuration = BigDecimal(readDuration(iParams[:AttackDuration], lHeader.SampleRate).to_s)
@@ -193,13 +193,13 @@ module MusicMaster
               lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
             end
             
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'DampedDiffProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'DampedDiffProfileDB', lDBUnits, iTempDir)
             
             # Eliminate glitches in the function.
             # This is done by deleting intermediate abscisses that are too close to each other
             lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate).to_s))
 
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits, iTempDir)
 
             # Round the function for the following reasons:
             # * BigDecimal#to_f method has bug with some extreme numbers (a 2424 digits number with exponent -411 gives a float with exponent +308), and to_f is used in the C code to apply volume fonction.
@@ -212,7 +212,7 @@ module MusicMaster
             logInfo "Precision set for rounding function: #{lRoundExponentPrecision}"
             lDiffProfileFunction.roundToPrecision(BigDecimal('1'), BigDecimal('10')**lRoundExponentPrecision)
 
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RoundedDiffProfileDB', lDBUnits)
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RoundedDiffProfileDB', lDBUnits, iTempDir)
             
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
@@ -235,13 +235,15 @@ module MusicMaster
       # * *iFunction* (<em>WSK::Functions::Function</em>): The function to dump
       # * *iName* (_String_): Name given to this function
       # * *iDBUnits* (_Boolean_): Is the function in DB units ?
-      def dumpDebugFct(iInputFileName, iFunction, iName, iDBUnits)
+      # * *iTempDir* (_String_): Temporary directory to use
+      def dumpDebugFct(iInputFileName, iFunction, iName, iDBUnits, iTempDir)
+        lBaseFileName = File.basename(iInputFileName)[0..-5]
         # Clone the function to round it first
         lRoundedFunction = WSK::Functions::Function.new
         lRoundedFunction.set(iFunction.functionData.clone)
         lRoundedFunction.roundToPrecision(BigDecimal('1'), BigDecimal('1000000000'))
-        lRoundedFunction.writeToFile("Master/_#{iName}.fct.rb")
-        MusicMaster::wsk(iInputFileName, "Master/_#{iName}.wav", 'DrawFct', "--function \"Master/_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
+        lRoundedFunction.writeToFile("#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb")
+        MusicMaster::wsk(iInputFileName, "#{iTempDir}/_#{lBaseFileName}_#{iName}.wav", 'DrawFct', "--function \"#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
       end
       
     end

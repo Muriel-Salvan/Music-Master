@@ -22,7 +22,7 @@ module MusicMaster
         if (iParams[:DBUnits])
           lStrUnitDB = '1'
         end
-        MusicMaster::wsk(iInputFileName, iOutputFileName, 'ApplyVolumeFct', "--function \"#{iParams[:FunctionFile]}\" --begin \"#{iParams[:Begin]}}\" --end \"#{iParams[:End]}}\" --unitdb #{lStrUnitDB}")
+        MusicMaster::wsk(iInputFileName, iOutputFileName, 'ApplyVolumeFct', "--function \"#{iParams[:FunctionFile]}\" --begin \"#{iParams[:Begin]}\" --end \"#{iParams[:End]}\" --unitdb #{lStrUnitDB}")
       end
 
     end
