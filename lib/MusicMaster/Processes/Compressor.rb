@@ -113,7 +113,7 @@ module MusicMaster
               ]
             } )
           end
-          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ p[0].to_s('F'), p[1].to_s('F') ] }.inspect}"
+          logInfo "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ sprintf('%.2f', p[0]), sprintf('%.2f', p[1]) ] }.inspect}"
 
           # Compute the volume transformation function based on the profile function and the Compressor's parameters
           lTempVolTransformFile = "#{iTempDir}/#{File.basename(iInputFileName)[0..-5]}.VolumeFct.rb"
