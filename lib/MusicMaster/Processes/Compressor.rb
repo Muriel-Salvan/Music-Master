@@ -133,7 +133,7 @@ module MusicMaster
               end
             end
             
-            #lProfileFunction.writeToFile('ProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lProfileFunction, 'ProfileDB', lDBUnits)
 
             # Clone the profile function before applying the map
             lNewProfileFunction = WSK::Functions::Function.new
@@ -142,7 +142,7 @@ module MusicMaster
             # Transform the Profile function with the Compressor function
             lNewProfileFunction.applyMapFunction(lCompressorFunction)
 
-            #lNewProfileFunction.writeToFile('NewProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits)
 
             # The difference of the functions will give the volume transformation profile
             lDiffProfileFunction = WSK::Functions::Function.new
@@ -155,7 +155,7 @@ module MusicMaster
               lDiffProfileFunction.divideByFunction(lProfileFunction)
             end
 
-            #lDiffProfileFunction.writeToFile('RawDiffProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits)
 
             # Apply damping for attack and release times
             lAttackDuration = BigDecimal(readDuration(iParams[:AttackDuration], lHeader.SampleRate).to_s)
@@ -192,13 +192,13 @@ module MusicMaster
               lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
             end
             
-            #lDiffProfileFunction.writeToFile('DampedDiffProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'DampedDiffProfileDB', lDBUnits)
             
             # Eliminate glitches in the function.
             # This is done by deleting intermediate abscisses that are too close to each other
             lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate).to_s))
 
-            #lDiffProfileFunction.writeToFile('SmoothedDiffProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits)
 
             # Round the function for the following reasons:
             # * BigDecimal#to_f method has bug with some extreme numbers (a 2424 digits number with exponent -411 gives a float with exponent +308), and to_f is used in the C code to apply volume fonction.
@@ -211,7 +211,7 @@ module MusicMaster
             logInfo "Precision set for rounding function: #{lRoundExponentPrecision}"
             lDiffProfileFunction.roundToPrecision(BigDecimal('1'), BigDecimal('10')**lRoundExponentPrecision)
 
-            #lDiffProfileFunction.writeToFile('RoundedDiffProfileDB.fct.rb')
+            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RoundedDiffProfileDB', lDBUnits)
             
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
@@ -226,6 +226,23 @@ module MusicMaster
         end
       end
 
+      # Dump a function into a Wave file.
+      # This is used for debugging purposes only.
+      #
+      # Parameters:
+      # * *iInputFileName* (_String_): Name of the input file
+      # * *iFunction* (<em>WSK::Functions::Function</em>): The function to dump
+      # * *iName* (_String_): Name given to this function
+      # * *iDBUnits* (_Boolean_): Is the function in DB units ?
+      def dumpDebugFct(iInputFileName, iFunction, iName, iDBUnits)
+        # Clone the function to round it first
+        lRoundedFunction = WSK::Functions::Function.new
+        lRoundedFunction.set(iFunction.functionData.clone)
+        lRoundedFunction.roundToPrecision(BigDecimal('1'), BigDecimal('1000000000'))
+        lRoundedFunction.writeToFile("Master/_#{iName}.fct.rb")
+        MusicMaster::wsk(iInputFileName, "Master/_#{iName}.wav", 'DrawFct', "--function \"Master/_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
+      end
+      
     end
 
   end
