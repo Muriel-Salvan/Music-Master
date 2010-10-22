@@ -22,7 +22,7 @@ module MusicMaster
       include WSK::Common
 
       # -Infinity
-      MINUS_INFINITY = BigDecimal('-Infinity')
+      MINUS_INFINITY = -1.0/0.0
 
       # Execute the process
       #
@@ -82,25 +82,21 @@ module MusicMaster
             end
           end
 
-          # Arbitrary value
-          # TODO: Find a way to set it to a realistic value
-          lNbrDigitsLogPrecision = 10
-          
           # Create the Compressor's function based on the parameters
           # Minimal value represented in DB.
           # This value will be used to replace -Infinity
           lMinimalDBValue = nil
           lCompressorFunction = WSK::Functions::Function.new
-          lBDThreshold = BigDecimal(iParams[:Threshold].to_s)
+          lBDThreshold = Rational(iParams[:Threshold])
           if (lDBUnits)
             # The minimal DB value is the smallest ratio possible for RMS values of this file (1/2^(BPS-1)) converted in DB and minus 1 to not mix it with the ratio 1/2^(BPS-1)
-            lMinimalDBValue = lCompressorFunction.bdVal2db(BigDecimal('1'), BigDecimal('2')**(lHeader.NbrBitsPerSample-1), lNbrDigitsLogPrecision) - 1
+            lMinimalDBValue = lCompressorFunction.valueVal2db(Rational(1), Rational(2)**(lHeader.NbrBitsPerSample-1)) - 1
             lCompressorFunction.set( {
               :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
               :Points => [
                 [lMinimalDBValue, lMinimalDBValue],
                 [lBDThreshold, lBDThreshold],
-                [0, lBDThreshold - lBDThreshold/BigDecimal(iParams[:Ratio].to_s) ]
+                [0, lBDThreshold - lBDThreshold/Rational(iParams[:Ratio]) ]
               ]
             } )
           else
@@ -109,7 +105,7 @@ module MusicMaster
               :Points => [
                 [0, 0],
                 [lBDThreshold, lBDThreshold],
-                [1, lBDThreshold + (BigDecimal('1')-lBDThreshold)/BigDecimal(iParams[:Ratio].to_s) ]
+                [1, lBDThreshold + (1-lBDThreshold)/Rational(iParams[:Ratio]) ]
               ]
             } )
           end
@@ -125,7 +121,7 @@ module MusicMaster
             lProfileFunction.readFromFile(lTempVolProfileFile)
             if (lDBUnits)
               # Convert the Profile function in DB units
-              lProfileFunction.convertToDB(1, lNbrDigitsLogPrecision)
+              lProfileFunction.convertToDB(Rational(1))
               # Replace -Infinity with lMinimalDBValue
               lProfileFunction.functionData[:Points].each do |ioPoint|
                 if (ioPoint[1] == MINUS_INFINITY)
@@ -159,10 +155,10 @@ module MusicMaster
             #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits, iTempDir)
 
             # Apply damping for attack and release times
-            lAttackDuration = BigDecimal(readDuration(iParams[:AttackDuration], lHeader.SampleRate).to_s)
-            lAttackSlope = BigDecimal(iParams[:AttackDamping].to_s)/lAttackDuration
-            lReleaseDuration = BigDecimal(readDuration(iParams[:ReleaseDuration], lHeader.SampleRate).to_s)
-            lReleaseSlope = BigDecimal(iParams[:ReleaseDamping].to_s)/lReleaseDuration
+            lAttackDuration = Rational(readDuration(iParams[:AttackDuration], lHeader.SampleRate))
+            lAttackSlope = Rational(iParams[:AttackDamping])/lAttackDuration
+            lReleaseDuration = Rational(readDuration(iParams[:ReleaseDuration], lHeader.SampleRate))
+            lReleaseSlope = Rational(iParams[:ReleaseDamping])/lReleaseDuration
             if (lDBUnits)
               lAttackSlope = -lAttackSlope
               lReleaseSlope = -lReleaseSlope
@@ -197,20 +193,20 @@ module MusicMaster
             
             # Eliminate glitches in the function.
             # This is done by deleting intermediate abscisses that are too close to each other
-            lDiffProfileFunction.removeNoiseAbscisses(BigDecimal(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate).to_s))
+            lDiffProfileFunction.removeNoiseAbscisses(Rational(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate)))
 
             #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits, iTempDir)
 
             # Round the function for the following reasons:
             # * BigDecimal#to_f method has bug with some extreme numbers (a 2424 digits number with exponent -411 gives a float with exponent +308), and to_f is used in the C code to apply volume fonction.
-            lMaxValue = BigDecimal('2')**(lHeader.NbrBitsPerSample-1)
-            lSmallestDiffValue = BigDecimal('1')/lMaxValue
-            if (lDBUnits)
-              lSmallestDiffValue = lCompressorFunction.bdVal2db(lMaxValue - lSmallestDiffValue, lMaxValue, lNbrDigitsLogPrecision)
-            end
-            lRoundExponentPrecision = 2-lSmallestDiffValue.exponent
-            logInfo "Precision set for rounding function: #{lRoundExponentPrecision}"
-            lDiffProfileFunction.roundToPrecision(BigDecimal('1'), BigDecimal('10')**lRoundExponentPrecision)
+#            lMaxValue = BigDecimal('2')**(lHeader.NbrBitsPerSample-1)
+#            lSmallestDiffValue = BigDecimal('1')/lMaxValue
+#            if (lDBUnits)
+#              lSmallestDiffValue = lCompressorFunction.valueVal2db(lMaxValue - lSmallestDiffValue, lMaxValue)
+#            end
+#            lRoundExponentPrecision = 2-lSmallestDiffValue.exponent
+#            logInfo "Precision set for rounding function: #{lRoundExponentPrecision}"
+#            lDiffProfileFunction.roundToPrecision(BigDecimal('1'), BigDecimal('10')**lRoundExponentPrecision)
 
             #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RoundedDiffProfileDB', lDBUnits, iTempDir)
             
@@ -241,7 +237,7 @@ module MusicMaster
         # Clone the function to round it first
         lRoundedFunction = WSK::Functions::Function.new
         lRoundedFunction.set(iFunction.functionData.clone)
-        lRoundedFunction.roundToPrecision(BigDecimal('1'), BigDecimal('1000000000'))
+        #lRoundedFunction.roundToPrecision(BigDecimal('1'), BigDecimal('1000000000'))
         lRoundedFunction.writeToFile("#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb")
         MusicMaster::wsk(iInputFileName, "#{iTempDir}/_#{lBaseFileName}_#{iName}.wav", 'DrawFct', "--function \"#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
       end
