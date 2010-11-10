@@ -1,2 +1,3 @@
 * Add a Makefile generation procedure to ensure that modifying files will regenerate correct albums.
 * Implement Functions with inheritance for specialization.
+* Implement a Multiband compressor.
