@@ -92,7 +92,7 @@ module MusicMaster
           # This value will be used to replace -Infinity
           lMinimalDBValue = nil
           lCompressorFunction = WSK::Functions::Function.new
-          lBDThreshold = Rational(iParams[:Threshold])
+          lBDThreshold = iParams[:Threshold].to_r
           if (lDBUnits)
             # The minimal DB value is the smallest ratio possible for RMS values of this file (1/2^(BPS-1)) converted in DB and minus 1 to not mix it with the ratio 1/2^(BPS-1)
             lMinimalDBValue = lCompressorFunction.valueVal2db(Rational(1), Rational(2)**(lHeader.NbrBitsPerSample-1)) - 1
@@ -101,7 +101,7 @@ module MusicMaster
               :Points => [
                 [lMinimalDBValue, lMinimalDBValue],
                 [lBDThreshold, lBDThreshold],
-                [0, lBDThreshold - lBDThreshold/Rational(iParams[:Ratio]) ]
+                [0, lBDThreshold - lBDThreshold/(iParams[:Ratio].to_r) ]
               ]
             } )
           else
@@ -110,7 +110,7 @@ module MusicMaster
               :Points => [
                 [0, 0],
                 [lBDThreshold, lBDThreshold],
-                [1, lBDThreshold + (1-lBDThreshold)/Rational(iParams[:Ratio]) ]
+                [1, lBDThreshold + (1-lBDThreshold)/(iParams[:Ratio].to_r) ]
               ]
             } )
           end
@@ -160,7 +160,7 @@ module MusicMaster
               lDiffProfileFunction.divideByFunction(lProfileFunction)
             end
 
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits, iTempDir)
+            dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits, iTempDir)
 
             # Apply damping for attack and release times
             logInfo 'Damp differing function with attack and release ...'
@@ -206,7 +206,7 @@ module MusicMaster
             logInfo 'Smooth differing function ...'
             lDiffProfileFunction.removeNoiseAbscisses(Rational(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate)))
 
-            #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits, iTempDir)
+            dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits, iTempDir)
 
             # Save the volume transformation file
             lDiffProfileFunction.writeToFile(lTempVolTransformFile)
