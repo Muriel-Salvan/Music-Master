@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2009-2010 Muriel Salvan (murielsalvan@users.sourceforge.net)
+# Copyright (c) 2009 - 2011 Muriel Salvan (murielsalvan@users.sourceforge.net)
 # Licensed under the terms specified in LICENSE file. No warranty is provided.
 #++
 
@@ -16,7 +16,7 @@ RubyPackager::ReleaseInfo.new.
     :Description => 'Command line tool handling steps to deliver music album masters from recordings. Handle Track Mixing, Track Mastering, Track Master Delivery, Album Mastering and Album Master Delivery. Easy-to-use configuration files drive the complete processes.',
     :ImageURL => 'http://musicmaster.sourceforge.net/wiki/images/d/d4/Logo.jpg',
     :FaviconURL => 'http://musicmaster.sourceforge.net/wiki/images/2/26/Favicon.png',
-    :SVNBrowseURL => 'http://musicmaster.svn.sourceforge.net/viewvc/waveswissknife/',
+    :SVNBrowseURL => 'http://musicmaster.svn.sourceforge.net/viewvc/musicmaster/',
     :DevStatus => 'Alpha'
   ).
   addCoreFiles( [
