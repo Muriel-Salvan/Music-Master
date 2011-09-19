@@ -13,6 +13,35 @@ require 'MusicMaster/ConfLoader'
 
 module MusicMaster
 
+  def self.val2db(iRatio)
+    if (iRatio == 0)
+      return -1.0/0
+    else
+      return (6*Math.log(iRatio))/Math.log(2.0)
+    end
+  end
+
+  # Read a ratio or db, and get back the corresponding ratio in db
+  #
+  # Parameters:
+  # * *iStrValue* (_String_): The value to read
+  # Return:
+  # * _Float_: The corresponding ratio in db
+  def self.readStrRatio(iStrValue)
+    rRatio = nil
+
+    lMatch = iStrValue.match(/^(.*)db$/)
+    if (lMatch == nil)
+      # The argument is a ratio
+      rRatio = val2db(iStrValue.to_f)
+    else
+      # The argument is already in db
+      rRatio = iStrValue.to_f
+    end
+
+    return rRatio
+  end
+
   # Get the configuration
   #
   # Parameters:
@@ -194,16 +223,36 @@ module MusicMaster
         end
       end
       # Now treat additional WAV files
-      if (iRecordConf[:WaveFiles])
-        lLstWaveFiles = Dir.glob('Wave.*.wav')
-        if (lLstWaveFiles.empty?)
-          logWarn 'Record conf indicated some Wave files were present, but none was found.'
-        else
-          lLstWaveFiles.each do |iFileName|
-            rConfig[:MixFiles] << {
-              :FileName => iFileName,
-              :Operations => []
-            }
+      if (iRecordConf[:WaveFiles] != nil)
+        # Check if there is a global ratio to apply
+        lGlobalRatio = nil
+        if (iRecordConf[:WaveFiles][:VolCorrection] != nil)
+          lGlobalRatio = readStrRatio(iRecordConf[:WaveFiles][:VolCorrection])
+        end
+        iRecordConf[:WaveFiles][:FilesList].each do |iWaveInfo|
+          lLstFileNames = Dir.glob("#{$MusicMasterConf[:Record][:WaveDir]}/#{iWaveInfo[:Name]}")
+          if (lLstFileNames.empty?)
+            logWarn "No Wave file found as \"#{$MusicMasterConf[:Record][:WaveDir]}/#{iWaveInfo[:Name]}\"."
+          else
+            lLstFileNames.each do |iWaveFileName|
+              lOperations = []
+              if (iWaveInfo[:VolCorrection] != nil)
+                lRatio = readStrRatio(iWaveInfo[:VolCorrection])
+                if (lGlobalRatio != nil)
+                  lRatio += lGlobalRatio
+                end
+                lOperations << [ 'Multiply', "--coeff \"#{lRatio}\"db" ]
+              elsif (lGlobalRatio != nil)
+                lOperations << [ 'Multiply', "--coeff \"#{lGlobalRatio}\"db" ]
+              end
+              if (iWaveInfo[:Position] != nil)
+                lOperations << [ 'SilenceInserter', "--begin \"#{iWaveInfo[:Position]}\" --end 0" ]
+              end
+              rConfig[:MixFiles] << {
+                :FileName => iWaveFileName,
+                :Operations => lOperations
+              }
+            end
           end
         end
       end

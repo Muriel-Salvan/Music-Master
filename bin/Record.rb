@@ -92,8 +92,9 @@ module MusicMaster
               end
             end
           end
-          if (lConf[:WaveFiles])
-            puts '===== Generate Wave in Wave.*.wav files ====='
+          if (lConf[:WaveFiles] != nil)
+            puts "===== Generate the following wave files in #{$MusicMasterConf[:Record][:WaveDir]} ====="
+            puts lConf[:WaveFiles][:FilesList].map { |iWaveInfo| next "* #{iWaveInfo[:Name]}" }.sort.uniq.join("\n")
             puts 'Press Enter to continue once done.'
             $stdin.gets
           end

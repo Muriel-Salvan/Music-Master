@@ -12,6 +12,9 @@
     # Directory in which temporary files will be generated
     :TempDir => 'RecordTemp',
 
+    # Directory in which recorded Wave files are stored
+    :WaveDir => 'WaveSrc',
+
     # Method returning the name of the next recorded file
     :RecordedFileGetter => Proc.new do
       next `ls -rt /path/to/recorded/files/*.wav | tail -1 | head -1`.chomp

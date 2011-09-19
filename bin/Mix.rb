@@ -8,6 +8,7 @@ require 'MusicMaster/Common'
 require 'rUtilAnts/Logging'
 RUtilAnts::Logging::initializeLogging('', '')
 require 'MusicMaster/ConfLoader'
+require 'digest/md5'
 
 module MusicMaster
 
@@ -66,7 +67,9 @@ module MusicMaster
     iOperations.each_with_index do |iOperationInfo, iIdxOperation|
       iAction, iParameters = iOperationInfo
       lInputFileName = rResultFileName.clone
-      rResultFileName = "#{lBaseName}.#{iIdxOperation}.#{iAction}.wav"
+      # Compute a unique ID for this operation.
+      lOperationID = Digest::MD5.hexdigest("#{iAction}|#{iParameters}")
+      rResultFileName = "#{lBaseName}.#{iIdxOperation}.#{iAction}.#{lOperationID}.wav"
       # Call wsk if the file does not exist already
       if (!File.exists?(rResultFileName))
         wsk(lInputFileName, rResultFileName, iAction, iParameters)

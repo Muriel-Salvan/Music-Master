@@ -39,7 +39,29 @@
 
   },
 
-  # Specify if there are some files to include in the Mix that don't need to be recorded
-  :WaveFiles => true
+  # Specify Wave files to include in the Mix
+  :WaveFiles => {
+    :FilesList => [
+      {
+        :Name => 'Effect1.wav',
+      },
+      {
+        :Name => 'Effect1.wav',
+        :Position => '94.404s'
+      },
+      {
+        :Name => 'Effect2.wav',
+        :Position => '246.482s',
+        :VolCorrection => '-2db'
+      },
+      {
+        # Can use wildcards too
+        :Name => 'Noise*.wav',
+        :Position => '46.2s',
+        :VolCorrection => '-4db'
+      }
+    ],
+    :VolCorrection => '-6db'
+  }
 
 }
