@@ -241,7 +241,9 @@ module MusicMaster
                 if (lGlobalRatio != nil)
                   lRatio += lGlobalRatio
                 end
-                lOperations << [ 'Multiply', "--coeff \"#{lRatio}\"db" ]
+                if (lRatio != 0)
+                  lOperations << [ 'Multiply', "--coeff \"#{lRatio}\"db" ]
+                end
               elsif (lGlobalRatio != nil)
                 lOperations << [ 'Multiply', "--coeff \"#{lGlobalRatio}\"db" ]
               end
