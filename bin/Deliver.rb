@@ -1,42 +1,75 @@
 #!env ruby
 #--
-# Copyright (c) 2009 - 2011 Muriel Salvan (murielsalvan@users.sourceforge.net)
+# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
 # Licensed under the terms specified in LICENSE file. No warranty is provided.
 #++
 
-require 'MusicMaster/Common'
-require 'rUtilAnts/Logging'
-RUtilAnts::Logging::initializeLogging('', '')
-require 'MusicMaster/ConfLoader'
+require 'MusicMaster/Launcher'
 
 module MusicMaster
 
-  # Execute the delivery
-  #
-  # Parameters:
-  # * *iWaveFile* (_String_): Wave file to deliver
-  def self.execute(iWaveFile)
-    lRealBaseName = File.basename(iWaveFile)[0..-5]
-    MusicMaster::src(iWaveFile, "#{$MusicMasterConf[:Deliver][:Dir]}/#{lRealBaseName}_96_24.wav", :SampleRate => 96000)
-    MusicMaster::src(iWaveFile, "#{$MusicMasterConf[:Deliver][:Dir]}/#{lRealBaseName}_48_24.wav", :SampleRate => 48000)
-    MusicMaster::src(iWaveFile, "#{$MusicMasterConf[:Deliver][:Dir]}/#{lRealBaseName}_44_16.wav", :SampleRate => 44100, :BitDepth => 16, :Dither => true)
-    # TODO: Deliver MP3 files too
+  class Deliver < Launcher
+
+    protected
+
+    # Give additional command line options banner
+    #
+    # Return::
+    # * _String_: Options banner
+    def getOptionsBanner
+      return '[--name <DeliverableName>]*'
+    end
+
+    # Complete options with the specific ones of this binary
+    #
+    # Parameters::
+    # * *ioOptionParser* (_OptionParser_): The options parser to complete
+    def completeOptionParser(ioOptionParser)
+      @LstDeliverableNames = []
+      ioOptionParser.on( '--name <DeliverableName>', String,
+        'Specify the name of the deliverable to produce. Can be used several times. If not specified, all deliverables will be produced.') do |iArg|
+        @LstDeliverableNames << iArg
+      end
+    end
+
+    # Check configuration.
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Exception_: Error, or nil in case of success
+    def checkConf(iConf)
+      rError = nil
+
+      # Check that all formats referenced correspond to a given format
+      if ((iConf[:Deliver] != nil) and
+          (iConf[:Deliver][:Deliverables] != nil))
+        iConf[:Deliver][:Deliverables].each do |iDeliverableName, iDeliverableConf|
+          if (iDeliverableConf[:Format] != nil)
+            raise "Unknown format #{iDeliverableConf[:Format]} needed to deliver #{iDeliverableName}" if (iConf[:Deliver][:Formats][iDeliverableConf[:Format]] == nil)
+          end
+          raise "No mix specified for deliverable #{iDeliverableName}" if (iDeliverableConf[:Mix] == nil)
+        end
+      end
+
+      return rError
+    end
+
+    # Initialize Rake processes and return the task to be built
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Symbol_: Rake target to execute
+    def getRakeTarget(iConf)
+      initialize_RakeProcesses(:LstDeliverableNames => @LstDeliverableNames)
+      generateRakeFor_Deliver(iConf)
+
+      return :Deliver
+    end
+
   end
 
 end
 
-rErrorCode = 0
-lWaveFile = ARGV[0]
-if (lWaveFile == nil)
-  logErr 'Please specify the WAVE file.'
-  rErrorCode = 1
-elsif (!File.exists?(lWaveFile))
-  logErr "File #{lWaveFile} does not exist."
-  rErrorCode = 2
-else
-  FileUtils::mkdir_p($MusicMasterConf[:Deliver][:Dir])
-  MusicMaster::execute(lWaveFile)
-  logInfo "===== Delivery finished in #{$MusicMasterConf[:Deliver][:Dir]}"
-end
-
-exit rErrorCode
+exit MusicMaster::Deliver.new.execute(ARGV)

@@ -1,67 +1,389 @@
 {
 
-  # Tracks that will be recorded during the same take
-  :Performs => [
-    [2, 4, 5],
-    [6, 8, 9],
-    [7],
-    [10]
-  ],
+  # Specify recordings
+  :Recordings => {
 
-  # Tracks that will be recorded alone
-  # Additional parameters are given to adjust their level with the Perform tracks
-  :Patches => {
+    # Define how recording environments, used while recording tracks, can be calibrated
+    # Calibration is done by recording the same music in both environments, then comparing the recorded samples.
+    :EnvCalibration => {
 
-    1 => {
-      # Effects to apply once recorded
-      :Effects => [
-        {
-          :Name => 'GVerb'
-        }
-      ],
-      # Either use :VolCorrection or :VolCompareCuts
-      :VolCorrection => '1/4', # Can be also specified in db (ie. '-5db')
-      # Specify that we can record a sample of the Track with the reference and original volume, and cut the following range in this sample recording, to compute the volume correction to apply.
-      :VolCompareCuts => ['0.1s', '32s']
+      # How do we calibrate :Perform and :Patch1 recording environments ?
+      [ :Perform, :Patch1 ] => {
+        # Compare recordings in the following time window only (used when instrument attacks or releases should not be used to compare recordings volume)
+        :CompareCuts => ['1s', '25s']
+      }
+
     },
 
-    3 => {
-      # Effects to apply once recorded
-      :Effects => [
+    # Give an eventual order for recording environments.
+    # Doing so, Music Master will first ask you to record everything from a given recording environment before changing recording environments.
+    # Non specified environments will be happened after by default (ordered from the environment having the most recordings to perform first).
+    :EnvRecordingOrder => [ :Perform, :Patch1 ],
+
+    # Specify the list of tracks groups to be recorded, along with their processes if any
+    :Tracks => {
+
+      # Record tracks 2, 4 and 5 in the "Perform" environment.
+      [2, 4, 5] => {
+        :Env => :Perform
+      },
+
+      # Tracks 6, 8, 9 need additional processing after recording: some reverb and compression.
+      [6, 8, 9] => {
+        :Env => :Perform,
+        :Processes => [
+          {
+            :Name => 'GVerb'
+          },
+          {
+            :Name => 'Compressor',
+            :DBUnits => true,
+            :Threshold => 6,
+            :Ratio => 10,
+            :AttackDuration => '0.2s',
+            :AttackDamping => 1,
+            :AttackLookAhead => true,
+            :ReleaseDuration => '0.3s',
+            :ReleaseDamping => 1.2,
+            :ReleaseLookAhead => false,
+            :MinChangeDuration => '1s',
+            :RMSRatio => 0.1
+          }
+        ]
+      },
+
+      # Track 10 is recorded alone
+      # Assign an alias to it. This can be used in mix.conf.rb.
+      [10] => {
+        :Env => :Perform,
+        :Alias => 'Drums'
+      },
+
+      # Track 7 is recorded using its own environment, and uses several aliases
+      [7] => {
+        :Env => :Patch7,
+        :Alias => [ 'Choruses', 'Choeurs' ]
+      },
+
+      # Track 1 is recorded using its own environment, and we want to calibrate volume based on a recording using the :Perform environment
+      # This will ask for calibration between both environments (if not already done by another track's recording), and apply a volume transformation process to match volumes on the recorded track.
+      [1] => {
+        :Env => :Patch1,
+        :CalibrateWithEnv => :Perform
+      },
+
+      # Track 3 is recorded using its own environment, but there is no need for calibration, as we already know how to apply volume correction
+      [3] => {
+        :Env => :Patch3,
+        :Processes => [
+          {
+            :Name => 'VolCorrection',
+            :Factor => '-5db'
+          }
+        ]
+      },
+
+      # Tracks 11 and 12 are recorded in the same environment as track 1
+      # However, calibration will be performed just once between :Patch1 and :Perform
+      [11, 12] => {
+        :Env => :Patch1,
+        :CalibrateWithEnv => :Perform
+      }
+
+    },
+
+    # Specify processes linked to some recording environments
+    # These processes will be applied before applying individually specified processes
+    :EnvProcesses_Before => {
+
+      # All processes to apply to the :Patch1 recordings
+      :Patch1 => [
+        {
+          :Name => 'Normalize'
+        }
+      ]
+
+    },
+
+    # Specify processes linked to some recording environments
+    # These processes will be applied after applying individually specified processes
+    :EnvProcesses_After => {
+
+      # All processes to apply to the :Patch1 recordings
+      :Patch1 => [
         {
           :Name => 'GVerb'
         }
-      ],
-      # Either use :VolCorrection or :VolCompareCuts
-      :VolCorrection => '3db',
-      :VolCompareCuts => ['1s', '25s']
-    }
+      ]
+
+    },
+
+    # Specify global processes that will be applied to all recorded tracks
+    # These processes will be applied before all individually specified processes and environment processes
+    :GlobalProcesses_Before => [
+      {
+        :Name => 'GVerb'
+      }
+    ],
+
+    # Specify global processes that will be applied to all recorded tracks
+    # These processes will be applied after all individually specified processes and environment processes
+    :GlobalProcesses_After => [
+      {
+        :Name => 'VolCorrection',
+        :Factor => '-3db'
+      }
+    ]
 
   },
 
   # Specify Wave files to include in the Mix
   :WaveFiles => {
+
+    # List of Wave files and their respective processes
+    # The same wave files can be specified several times
     :FilesList => [
+
+      # A simple Wave file (if the file does not exist, it will be asked to be created during the source files generation process)
       {
         :Name => 'Effect1.wav',
       },
+
+      # Mix this one with a starting position
       {
         :Name => 'Effect1.wav',
         :Position => '94.404s'
       },
+
+      # Add processes to it
       {
         :Name => 'Effect2.wav',
         :Position => '246.482s',
-        :VolCorrection => '-2db'
+        :Processes => [
+          {
+            :Name => 'GVerb'
+          },
+          {
+            :Name => 'VolCorrection',
+            :Factor => '-2db'
+          }
+        ]
       },
+
+      # With an alias
       {
-        # Can use wildcards too
+        :Name => 'Effect3.wav',
+        :Alias => 'Big boum'
+      },
+
+      # With several aliases
+      {
+        :Name => 'Effect4.wav',
+        :Alias => [ 'Little boum', 'Explosion noise' ]
+      },
+
+      # Specify several Wave files using wildcards
+      {
         :Name => 'Noise*.wav',
         :Position => '46.2s',
-        :VolCorrection => '-4db'
+        :Processes => [
+          {
+            :Name => 'VolCorrection',
+            :Factor => '-4db'
+          }
+        ]
       }
     ],
-    :VolCorrection => '-6db'
+
+    # Global transformation to apply to all the Wave files
+    # These processes will be applied before individually specified processes
+    :GlobalProcesses_Before => [
+      {
+        :Name => 'VolCorrection',
+        :Factor => '-6db'
+      }
+    ],
+
+    # Global transformation to apply to all the Wave files
+    # These processes will be applied after individually specified processes
+    :GlobalProcesses_After => [
+      {
+        :Name => 'Normalize'
+      }
+    ]
+
+  },
+
+  # Mix configuration
+  # Track identifiers can be either:
+  # * a tracks list, or
+  # * the aliases eventually associated to it, or
+  # * the name of a Wave file, or
+  # * the aliases eventually associated to it, or
+  # * the name of another mix (beware of cyclic mixes!), or
+  # * the aliases eventually associated to it
+  # Track identifiers have to be unique.
+  :Mix => {
+
+    # This mix will feature all the choruses tracks
+    'Choruses' => {
+      :Tracks => {
+        # No effect to add to this group
+        [2, 4, 5] => {},
+        # Add some processes before mixing
+        [6, 8, 9] => {
+          :Processes => [
+            {
+              :Name => 'GVerb'
+            },
+            {
+              :Name => 'VolCorrection',
+              :Factor => '1db'
+            }
+          ]
+        }
+      }
+    },
+
+    # This will feature instrumental part
+    'Instrumental' => {
+      :Tracks => {
+        # Using the name defined in record.conf.rb
+        'Drums' => {},
+        [7] => {},
+        [1] => {},
+        [3] => {
+          :Processes => [
+            {
+              :Name => 'VolCorrection',
+              :Factor => '-2db'
+            }
+          ]
+        }
+      },
+      # And apply some processes to the result
+      :Processes => [
+        {
+          :Name => 'VolCorrection',
+          :Factor => '-2db'
+        }
+      ]
+    },
+
+    'Final' => {
+      :Tracks => {
+        # Using identifiers from here
+        'Instrumental' => {},
+        'Choruses' => {},
+        # Or the name of a Wave file
+        'Effect3.wav' => {},
+        # Or one of its aliases
+        'Explosion noise' => {},
+        [11, 12] => {},
+        # Reusing the same tracks several times is possible
+        [6, 8, 9] => {}
+      },
+      # Define aliases for this mix
+      :Alias => [ 'Last mix', 'Best of' ]
+    }
+
+  },
+
+  # Delivery configuration
+  :Deliver => {
+
+    # Metadata
+    # This info can be used by plugins delivering files to convey additional info (title, year, music style...)
+    # Every attribute is optional.
+    # Some formats will be able to also write custom attributes.
+    :Metadata => {
+      # Common tags
+      :Title => 'My new music',
+      :TrackArtist => 'John',
+      :Genre => 'Electronica',
+      :ReleaseYear => 2012,
+      :TrackIndex => 3,
+      :Album => 'The new album',
+      :AlbumArtist => 'Johnny',
+      :Composer => 'Jojo',
+      :Band => 'The big orchestra',
+      :Conductor => 'Josh',
+      :Lyricist => 'Joe',
+      :Mood => 'Happy',
+      :RecordingYear => 2012,
+      :Publisher => 'John Cie',
+      :TrackTotal => 7,
+      :DiscIndex => 1,
+      :DiscTotal => 2,
+      # File name: use %{xxx} to replace with the value of property :xxx
+      :FileName => '%{TrackIndex} - %{TrackArtist} - %{Title}'
+    },
+
+    # Specify the available formats that can be used to deliver mixes
+    :Formats => {
+
+      'Wave 96k 24b' => {
+        # By default :FileFormat is 'Wave'
+        # By default :SampleRate and :BitDepth are the same as the mix file that will be used
+        :SampleRate => 96000
+      },
+
+      'Wave 48k 24b' => {
+        :SampleRate => 48000
+      },
+
+      'Wave 44k 16b' => {
+        :FileFormat => 'Wave',
+        :SampleRate => 44100,
+        :BitDepth => 16,
+        :Dither => true
+      },
+
+      'MP3 48k 320kbps' => {
+        :FileFormat => :MP3,
+        :SampleRate => 48000,
+        :BitRate => 320
+      },
+
+      'MP3 44k 128kbps' => {
+        :FileFormat => :MP3,
+        :SampleRate => 44100,
+        :BitRate => 128
+      }
+
+    },
+
+    # Deliver files
+    # For each entry from this set, there will be a file named <DeliverableName>/<FileName>.<FormatExtension>:
+    # * <DeliverableName> is the name specified in this set
+    # * <FileName> is given by the :FileName property from the metadata (defaults to 'Track')
+    # * <FormatExtension> is chosen by the format plugin
+    :Deliverables => {
+
+      # Specify at least the mix
+      # By default, the format is the same as the mix file
+      'The Choruses' => {
+        :Mix => 'Choruses'
+      },
+
+      # Force a given format
+      'The Choruses in MP3' => {
+        :Mix => 'Choruses',
+        :Format => 'MP3 48k 320kbps'
+      },
+
+      # Add specific metadata for this deliverable only (overwrites common metadata)
+      'Final Mix' => {
+        :Mix => 'Final',
+        :Format => 'MP3 44k 128kbps',
+        :Metadata => {
+          :Title => 'The music - v2'
+        }
+
+      }
+
+    }
+
   }
 
 }

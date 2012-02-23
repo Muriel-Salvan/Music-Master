@@ -1,5 +1,5 @@
 #--
-# Copyright (c) 2009 - 2011 Muriel Salvan (murielsalvan@users.sourceforge.net)
+# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
 # Licensed under the terms specified in LICENSE file. No warranty is provided.
 #++
 
@@ -11,18 +11,19 @@ module MusicMaster
 
       # Execute the process
       #
-      # Parameters:
+      # Parameters::
       # * *iInputFileName* (_String_): File name we want to apply effects to
       # * *iOutputFileName* (_String_): File name to write
       # * *iTempDir* (_String_): Temporary directory that can be used
       # * *iParams* (<em>map<Symbol,Object></em>): Parameters
       def execute(iInputFileName, iOutputFileName, iTempDir, iParams)
+        require 'rational'
         # First, analyze
         lAnalyzeResultFileName = "#{iTempDir}/#{File.basename(iInputFileName)}.analyze"
         if (File.exists?(lAnalyzeResultFileName))
-          logWarn "File #{lAnalyzeResultFileName} already exists. Will not overwrite it."
+          log_warn "File #{lAnalyzeResultFileName} already exists. Will not overwrite it."
         else
-          MusicMaster::wsk(iInputFileName, "#{iTempDir}/Dummy.wav", 'Analyze')
+          wsk(iInputFileName, "#{iTempDir}/Dummy.wav", 'Analyze')
           File.unlink("#{iTempDir}/Dummy.wav")
           FileUtils::mv('analyze.result', lAnalyzeResultFileName)
         end
@@ -40,8 +41,8 @@ module MusicMaster
         if (lCoeffNormalizeMin < lCoeff)
           lCoeff = lCoeffNormalizeMin
         end
-        logInfo "Maximal value: #{lMaxDataValue}/#{lMaxPossibleValue}. Minimal value: #{lMinDataValue}/#{lMinPossibleValue}. Volume correction: #{lCoeff}."
-        MusicMaster::wsk(iInputFileName, iOutputFileName, 'Multiply', "--coeff \"#{lCoeff.numerator}/#{lCoeff.denominator}\"")
+        log_info "Maximal value: #{lMaxDataValue}/#{lMaxPossibleValue}. Minimal value: #{lMinDataValue}/#{lMinPossibleValue}. Volume correction: #{lCoeff}."
+        wsk(iInputFileName, iOutputFileName, 'Multiply', "--coeff \"#{lCoeff.numerator}/#{lCoeff.denominator}\"")
       end
 
     end

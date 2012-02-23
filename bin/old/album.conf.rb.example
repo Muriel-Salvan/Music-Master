@@ -1,0 +1,78 @@
+{
+  # Recorded files of a Track should be in directories <TracksDir>/<TrackName>/<TrackVersion>/<TracksFilesSubDir>
+
+  # Path to the Tracks directories.
+  # Each Track is a sub-directory of this one, with its version (ie. ./Track2/0.1)
+  :TracksDir => '/path/to/Tracks',
+
+  # Sub-path to the recorded files
+  # Each Track is a sub-directory of this one, with its version (ie. Record/Files/)
+  # !!! Don't forget trailing /
+  :TracksFilesSubDir => 'sub/path/to/files/',
+
+  # Tracks to include in the album
+  :Tracks => [
+
+    { # 01
+      # Beginning of the Track's directory name
+      :TrackID => 'Track112',
+      # Track's version
+      :Version => '0.0.1.20100924',
+      # Additional steps for Mastering the Track in the album's scope
+      :AdditionalMastering => [
+        { :Name => 'CutFirstSignal' },
+        { :Name => 'Normalize' },
+        { :Name => 'VolCorrection', :Factor => '-2db' },
+        { :Name => 'Compressor' },
+        { :Name => 'AddSilence', :Begin => '1.2s', :End => '2.4s' }
+      ]
+    },
+
+    { # 02
+      :TrackID => 'Track114',
+      :Version => '0.0.1.20100924',
+      :AdditionalMastering => [
+        { :Name => 'CutFirstSignal' },
+        { :Name => 'Normalize' },
+        { :Name => 'VolCorrection', :Factor => '-2db' },
+        { :Name => 'Compressor' },
+        { :Name => 'AddSilence', :Begin => '1.2s', :End => '1s' }
+      ]
+    }
+  ],
+
+  # Specify in which formats this album should be delivered
+  :Deliveries => {
+
+    # Name of the delivery
+    'Wave 96k 24b' => {
+      # Parameters
+      :SampleRate => 96000
+    },
+
+    'Wave 48k 24b' => {
+      :SampleRate => 48000
+    },
+
+    'Wave 44k 16b' => {
+      # By default :FileFormat is :Wave
+      :FileFormat => :Wave,
+      :SampleRate => 44100,
+      :BitDepth => 16,
+      :Dither => true
+    },
+
+    'MP3 48k 320kbps' => {
+      :FileFormat => :MP3,
+      :SampleRate => 48000,
+      :BitRate => 320
+    },
+
+    'MP3 44k 128kbps' => {
+      :FileFormat => :MP3,
+      :SampleRate => 44100,
+      :BitRate => 128
+    }
+
+  }
+}

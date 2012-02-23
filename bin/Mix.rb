@@ -1,102 +1,62 @@
 #!env ruby
 #--
-# Copyright (c) 2009 - 2011 Muriel Salvan (murielsalvan@users.sourceforge.net)
+# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
 # Licensed under the terms specified in LICENSE file. No warranty is provided.
 #++
 
-require 'MusicMaster/Common'
-require 'rUtilAnts/Logging'
-RUtilAnts::Logging::initializeLogging('', '')
-require 'MusicMaster/ConfLoader'
-require 'digest/md5'
+require 'MusicMaster/Launcher'
 
 module MusicMaster
 
-  # Execute the Mix
-  #
-  # Parameters:
-  # * *iConfig* (<em>map<Symbol,Object></em>): The Mix configuration
-  # Return:
-  # * _String_: The resulting mix file
-  def self.execute(iConfig)
-    rPerformMixFile = nil
+  class Mix < Launcher
 
-    lMixInputFile = nil
-    lLstMixFiles = []
-    lMissingFiles = []
-    iConfig[:MixFiles].each do |iMixFileInfo|
-      if (!File.exists?(iMixFileInfo[:FileName]))
-        logErr "File #{iMixFileInfo[:FileName]} does not exist."
-        lMissingFiles << iMixFileInfo[:FileName]
-      else
-        lResultFileName = executeOperations(iMixFileInfo[:FileName], iMixFileInfo[:Operations])
-        if (lMixInputFile == nil)
-          lMixInputFile = lResultFileName
-        else
-          lLstMixFiles << lResultFileName
-        end
-      end
-    end
-    if (!lMissingFiles.empty?)
-      logErr "Mix will not be performed as some files were missing: #{lMissingFiles.join(', ')}"
-    else
-      if (lLstMixFiles.empty?)
-        logInfo "Single perform file to mix: #{lMixInputFile}"
-        rPerformMixFile = lMixInputFile
-      else
-        rPerformMixFile = "#{$MusicMasterConf[:Mix][:TempDir]}/Perform.Mix.wav"
-        wsk(lMixInputFile, rPerformMixFile, 'Mix', "--files \"#{lLstMixFiles.join('|1|')}|1\" ")
-      end
-      logInfo "Perform mix result in #{rPerformMixFile}"
+    protected
+
+    # Give additional command line options banner
+    #
+    # Return::
+    # * _String_: Options banner
+    def getOptionsBanner
+      return '[--name <MixName>]*'
     end
 
-    return rPerformMixFile
-  end
-
-  # Execute operations on a Wave file, then give back the resulting file
-  #
-  # Parameters:
-  # * *iInputFile* (_String_): The input wave file
-  # * *iOperations* (<em>list<[String,String]></em>): The list of operations to execute: [Action,Parameters].
-  # Return:
-  # * _String_: The resulting file name
-  def self.executeOperations(iInputFile, iOperations)
-    rResultFileName = iInputFile
-
-    lBaseName = "#{$MusicMasterConf[:Mix][:TempDir]}/#{File.basename(iInputFile)[0..-5]}"
-    iOperations.each_with_index do |iOperationInfo, iIdxOperation|
-      iAction, iParameters = iOperationInfo
-      lInputFileName = rResultFileName.clone
-      # Compute a unique ID for this operation.
-      lOperationID = Digest::MD5.hexdigest("#{iAction}|#{iParameters}")
-      rResultFileName = "#{lBaseName}.#{iIdxOperation}.#{iAction}.#{lOperationID}.wav"
-      # Call wsk if the file does not exist already
-      if (!File.exists?(rResultFileName))
-        wsk(lInputFileName, rResultFileName, iAction, iParameters)
+    # Complete options with the specific ones of this binary
+    #
+    # Parameters::
+    # * *ioOptionParser* (_OptionParser_): The options parser to complete
+    def completeOptionParser(ioOptionParser)
+      @LstMixNames = []
+      ioOptionParser.on( '--name <MixName>', String,
+        'Specify the name of the mix to produce. Can be used several times. If not specified, all mixes will be produced.') do |iArg|
+        @LstMixNames << iArg
       end
     end
 
-    return rResultFileName
+    # Check configuration.
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Exception_: Error, or nil in case of success
+    def checkConf(iConf)
+      return nil
+    end
+
+    # Initialize Rake processes and return the task to be built
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Symbol_: Rake target to execute
+    def getRakeTarget(iConf)
+      initialize_RakeProcesses(:LstMixNames => @LstMixNames)
+      generateRakeFor_Mix(iConf)
+
+      return :Mix
+    end
+
   end
 
 end
 
-rErrorCode = 0
-lConfigFile = ARGV[0]
-if (lConfigFile == nil)
-  logErr 'Please specify the configuration file.'
-  rErrorCode = 1
-elsif (!File.exists?(lConfigFile))
-  logErr "File #{lConfigFile} does not exist."
-  rErrorCode = 2
-else
-  FileUtils::mkdir_p($MusicMasterConf[:Mix][:TempDir])
-  lConfig = nil
-  File.open(lConfigFile, 'r') do |iFile|
-    lConfig = eval(iFile.read)
-  end
-  lMixFile = MusicMaster::execute(lConfig)
-  logInfo "===== Mix saved in #{lMixFile}"
-end
-
-exit rErrorCode
+exit MusicMaster::Mix.new.execute(ARGV)

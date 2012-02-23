@@ -1,142 +1,90 @@
 #!env ruby
 #--
-# Copyright (c) 2009 - 2011 Muriel Salvan (murielsalvan@users.sourceforge.net)
+# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
 # Licensed under the terms specified in LICENSE file. No warranty is provided.
 #++
 
-require 'fileutils'
-require 'optparse'
-require 'rUtilAnts/Logging'
-RUtilAnts::Logging::initializeLogging('', '')
-require 'MusicMaster/Common'
-require 'MusicMaster/ConfLoader'
+require 'MusicMaster/Launcher'
 
 module MusicMaster
 
-  class Record
+  class Record < Launcher
 
-    # Constructor
-    def initialize
-      # List of perform partitions
-      # list< list< Integer > >
-      @LstPerforms = []
-      # List of patch tracks
-      # list< Integer >
-      @LstPatches = []
-      @WaveFiles = false
-      MusicMaster::parsePlugins
+    protected
+
+    # Give additional command line options banner
+    #
+    # Return::
+    # * _String_: Options banner
+    def getOptionsBanner
+      return '[--recordedfilesprepared] [--env <RecordingEnv>]*'
     end
 
-    # Execute the recordings
+    # Complete options with the specific ones of this binary
     #
-    # Parameters:
-    # * *iArgs* (<em>list<String></em>): The list of arguments
-    # Return:
-    # * _Integer_: The error code
-    def execute(iArgs)
-      rErrorCode = 0
+    # Parameters::
+    # * *ioOptionParser* (_OptionParser_): The options parser to complete
+    def completeOptionParser(ioOptionParser)
+      @RecordedFilesPrepared = false
+      ioOptionParser.on( '--recordedfilesprepared',
+        'Recorded files are already prepared: no need to wait for user input while recording.') do
+        @RecordedFilesPrepared = true
+      end
+      @LstEnvToRecord = []
+      ioOptionParser.on( '--env <RecordingEnv>', String,
+        'Specify the recording environment to record. Can be used several times. If none specified, all environments will be recorded.') do |iArg|
+        @LstEnvToRecord << iArg.to_sym
+      end
+    end
 
-      lError = nil
-      # Read the arguments
-      if (iArgs.size != 1)
-        lError = RuntimeError.new('Usage: Record <ConfFile>')
-      else
-        # Read configuration
-        lError, lConf = MusicMaster::readRecordConf(iArgs[0])
-        if (lError == nil)
-          if (lConf[:Performs] != nil)
-            if (!lConf[:Performs].empty?)
-              # Record performances
-              lConf[:Performs].each do |iLstPerform|
-                puts "===== Record Perform partition #{iLstPerform.join(', ')} ====="
-                record("Perform.#{iLstPerform.join(' ')}.wav")
-              end
-              puts '===== Record Perform silence ====='
-              record('Perform.Silence.wav')
-            end
-          end
-          if (lConf[:Patches] != nil)
-            lConf[:Patches].each do |iIdxTrack, iTrackConf|
-              # If the track has already a volume correction to be applied, ignore this step
-              if (iTrackConf[:VolCorrection] == nil)
-                puts "===== Record Perform volume preview for track #{iIdxTrack} ====="
-                record("Patch.#{iIdxTrack}.VolReference.wav")
-                puts "===== Measure the volume cuts from file Patch.#{iIdxTrack}.VolReference.wav and set them in the record conf file ====="
-                puts 'Enter when done.'
-                $stdin.gets
-              end
-            end
-            # Now we don't need anymore the volume setting for Perform.
-            lConf[:Patches].each do |iIdxTrack, iTrackConf|
-              lTryAgain = true
-              while (lTryAgain)
-                puts "===== Record the Patch track #{iIdxTrack} ====="
-                record("Patch.#{iIdxTrack}.wav")
-                puts 'Is the file correct ? (No peak limit reached ?) \'y\'=yes.'
-                lTryAgain = ($stdin.gets.chomp != 'y')
-              end
-              if (iTrackConf[:Effects] != nil)
-                MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.wav", $MusicMasterConf[:Record][:TempDir])
-              end
-              puts "===== Record Patch silence for track #{iIdxTrack} ====="
-              record("Patch.#{iIdxTrack}.Silence.wav")
-              if (iTrackConf[:Effects] != nil)
-                MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.Silence.wav", $MusicMasterConf[:Record][:TempDir])
-              end
-              if (iTrackConf[:VolCorrection] == nil)
-                puts "===== Record Patch volume preview for track #{iIdxTrack} ====="
-                record("Patch.#{iIdxTrack}.VolOriginal.wav")
-                if (iTrackConf[:Effects] != nil)
-                  MusicMaster::applyProcesses(iTrackConf[:Effects], "Patch.#{iIdxTrack}.VolOriginal.wav", $MusicMasterConf[:Record][:TempDir])
-                end
-              end
-            end
-          end
-          if (lConf[:WaveFiles] != nil)
-            puts "===== Generate the following wave files in #{$MusicMasterConf[:Record][:WaveDir]} ====="
-            puts lConf[:WaveFiles][:FilesList].map { |iWaveInfo| next "* #{iWaveInfo[:Name]}" }.sort.uniq.join("\n")
-            puts 'Press Enter to continue once done.'
-            $stdin.gets
-          end
-          logInfo 'Finished recording ok. Ready to use PrepareMix.rb and Mix.rb.'
+    # Check configuration.
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Exception_: Error, or nil in case of success
+    def checkConf(iConf)
+      rError = nil
+
+      # Check that all tracks are assigned somewhere, just once
+      if ((iConf[:Recordings] != nil) and
+          (iConf[:Recordings][:Tracks] != nil))
+        lLstTracks = []
+        iConf[:Recordings][:Tracks].keys.each do |iLstTracks|
+          lLstTracks.concat(iLstTracks)
         end
-      end
-      if (lError != nil)
-        puts "!!! Error: #{lError}"
-        rErrorCode = 1
-      end
-
-      return rErrorCode
-    end
-
-    # Record into a given file
-    #
-    # Parameters:
-    # * *iFileName* (_String_): File name to record into
-    def record(iFileName)
-      lTryAgain = true
-      if (File.exists?(iFileName))
-        puts "File \"#{iFileName}\" already exists. Overwrite ? ['y' = yes]"
-        lTryAgain = ($stdin.gets.chomp == 'y')
-      end
-      while (lTryAgain)
-        puts "Record file \"#{iFileName}\""
-        puts 'Press Enter to continue once done. Type \'s\' to skip it.'
-        lSkip = ($stdin.gets.chomp == 's')
-        if (lSkip)
-          lTryAgain = false
-        else
-          # Get the last file that has been recorded
-          lFileName = $MusicMasterConf[:Record][:RecordedFileGetter].call
-          if (!File.exists?(lFileName))
-            logErr "File #{lFileName} does not exist. Could not get recorded file."
+        lAssignedTracks = {}
+        lLstTracks.each do |iIdxTrack|
+          if (lAssignedTracks.has_key?(iIdxTrack))
+            rError = RuntimeError.new("Track #{iIdxTrack} is recorded twice.")
+            break
           else
-            logInfo "Getting recorded file: #{lFileName} => #{iFileName}"
-            FileUtils::mv(lFileName, iFileName)
-            lTryAgain = false
+            lAssignedTracks[iIdxTrack] = nil
+          end
+        end
+        if (rError == nil)
+          lAssignedTracks.size.times do |iIdxTrack|
+            if (!lAssignedTracks.has_key?(iIdxTrack+1))
+              log_warn "Track #{iIdxTrack+1} is never recorded."
+            end
           end
         end
       end
+
+      return rError
+    end
+
+    # Initialize Rake processes and return the task to be built
+    #
+    # Parameters::
+    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
+    # Return::
+    # * _Symbol_: Rake target to execute
+    def getRakeTarget(iConf)
+      initialize_RakeProcesses(:RecordedFilesPrepared => @RecordedFilesPrepared, :LstEnvToRecord => @LstEnvToRecord)
+      generateRakeFor_GenerateSourceFiles(iConf)
+
+      return :GenerateSourceFiles
     end
 
   end
