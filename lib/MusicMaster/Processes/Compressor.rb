@@ -95,7 +95,7 @@ module MusicMaster
           lBDThreshold = iParams[:Threshold].to_r
           if (lDBUnits)
             # The minimal DB value is the smallest ratio possible for RMS values of this file (1/2^(BPS-1)) converted in DB and minus 1 to not mix it with the ratio 1/2^(BPS-1)
-            lMinimalDBValue = lCompressorFunction.valueVal2db(Rational(1), Rational(2)**(lHeader.NbrBitsPerSample-1)) - 1
+            lMinimalDBValue = lCompressorFunction.value_val_2_db(Rational(1), Rational(2)**(lHeader.NbrBitsPerSample-1)) - 1
             lCompressorFunction.set( {
               :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
               :Points => [
@@ -114,7 +114,7 @@ module MusicMaster
               ]
             } )
           end
-          log_info "Compressor transfer function: #{lCompressorFunction.functionData[:Points].map{ |p| next [ sprintf('%.2f', p[0]), sprintf('%.2f', p[1]) ] }.inspect}"
+          log_info "Compressor transfer function: #{lCompressorFunction.function_data[:Points].map{ |p| next [ sprintf('%.2f', p[0]), sprintf('%.2f', p[1]) ] }.inspect}"
 
           # Compute the volume transformation function based on the profile function and the Compressor's parameters
           lTempVolTransformFile = "#{iTempDir}/#{File.basename(iInputFileName)[0..-5]}.VolumeFct.rb"
@@ -124,12 +124,12 @@ module MusicMaster
             # Read the Profile function
             log_info 'Create volume profile function ...'
             lProfileFunction = WSK::Functions::Function.new
-            lProfileFunction.readFromFile(lTempVolProfileFile)
+            lProfileFunction.read_from_file(lTempVolProfileFile)
             if (lDBUnits)
               # Convert the Profile function in DB units
-              lProfileFunction.convertToDB(Rational(1))
+              lProfileFunction.convert_to_db(Rational(1))
               # Replace -Infinity with lMinimalDBValue
-              lProfileFunction.functionData[:Points].each do |ioPoint|
+              lProfileFunction.function_data[:Points].each do |ioPoint|
                 if (ioPoint[1] == MINUS_INFINITY)
                   ioPoint[1] = lMinimalDBValue
                 end
@@ -140,24 +140,24 @@ module MusicMaster
 
             # Clone the profile function before applying the map
             lNewProfileFunction = WSK::Functions::Function.new
-            lNewProfileFunction.set(lProfileFunction.functionData.clone)
+            lNewProfileFunction.set(lProfileFunction.function_data.clone)
             
             # Transform the Profile function with the Compressor function
             log_info 'Apply compressor transfer function ...'
-            lNewProfileFunction.applyMapFunction(lCompressorFunction)
+            lNewProfileFunction.apply_map_function(lCompressorFunction)
 
             #dumpDebugFct(iInputFileName, lNewProfileFunction, 'NewProfileDB', lDBUnits, iTempDir)
 
             # The difference of the functions will give the volume transformation profile
             log_info 'Compute differing function ...'
             lDiffProfileFunction = WSK::Functions::Function.new
-            lDiffProfileFunction.set(lNewProfileFunction.functionData.clone)
+            lDiffProfileFunction.set(lNewProfileFunction.function_data.clone)
             if (lDBUnits)
               # The volume transformation will be a DB difference
-              lDiffProfileFunction.substractFunction(lProfileFunction)
+              lDiffProfileFunction.substract_function(lProfileFunction)
             else
               # The volume transformation will be a ratio
-              lDiffProfileFunction.divideByFunction(lProfileFunction)
+              lDiffProfileFunction.divide_by_function(lProfileFunction)
             end
 
             dumpDebugFct(iInputFileName, lDiffProfileFunction, 'RawDiffProfileDB', lDBUnits, iTempDir)
@@ -176,26 +176,26 @@ module MusicMaster
             if ((iParams[:AttackLookAhead] == true) or
                 (iParams[:ReleaseLookAhead] == true))
               # Look-Aheads are implemented by applying damping on the reverted function
-              lDiffProfileFunction.invertAbscisses
+              lDiffProfileFunction.invert_abscisses
               if (iParams[:AttackLookAhead] == false)
-                lDiffProfileFunction.applyDamping(nil, -lReleaseSlope)
+                lDiffProfileFunction.apply_damping(nil, -lReleaseSlope)
               elsif (iParams[:ReleaseLookAhead] == false)
-                lDiffProfileFunction.applyDamping(lAttackSlope, nil)
+                lDiffProfileFunction.apply_damping(lAttackSlope, nil)
               else
-                lDiffProfileFunction.applyDamping(lAttackSlope, -lReleaseSlope)
+                lDiffProfileFunction.apply_damping(lAttackSlope, -lReleaseSlope)
               end
-              lDiffProfileFunction.invertAbscisses
+              lDiffProfileFunction.invert_abscisses
             end
             if (iParams[:AttackLookAhead] == true)
               if (iParams[:ReleaseLookAhead] == false)
-                lDiffProfileFunction.applyDamping(lReleaseSlope, nil)
+                lDiffProfileFunction.apply_damping(lReleaseSlope, nil)
               end
             elsif (iParams[:ReleaseLookAhead] == true)
               if (iParams[:AttackLookAhead] == false)
-                lDiffProfileFunction.applyDamping(nil, -lAttackSlope)
+                lDiffProfileFunction.apply_damping(nil, -lAttackSlope)
               end
             else
-              lDiffProfileFunction.applyDamping(lReleaseSlope, -lAttackSlope)
+              lDiffProfileFunction.apply_damping(lReleaseSlope, -lAttackSlope)
             end
             
             #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'DampedDiffProfileDB', lDBUnits, iTempDir)
@@ -204,12 +204,12 @@ module MusicMaster
             # This is done by deleting intermediate abscisses that are too close to each other
 
             log_info 'Smooth differing function ...'
-            lDiffProfileFunction.removeNoiseAbscisses(Rational(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate)))
+            lDiffProfileFunction.remove_noise_abscisses(Rational(readDuration(iParams[:MinChangeDuration], lHeader.SampleRate)))
 
             dumpDebugFct(iInputFileName, lDiffProfileFunction, 'SmoothedDiffProfileDB', lDBUnits, iTempDir)
 
             # Save the volume transformation file
-            lDiffProfileFunction.writeToFile(lTempVolTransformFile)
+            lDiffProfileFunction.write_to_file(lTempVolTransformFile)
           end
 
           # Apply the volume transformation to the Wave file
@@ -234,8 +234,8 @@ module MusicMaster
         lBaseFileName = File.basename(iInputFileName)[0..-5]
         # Clone the function to round it first
         lRoundedFunction = WSK::Functions::Function.new
-        lRoundedFunction.set(iFunction.functionData.clone)
-        lRoundedFunction.writeToFile("#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb", :Floats => true)
+        lRoundedFunction.set(iFunction.function_data.clone)
+        lRoundedFunction.write_to_file("#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb", :Floats => true)
         wsk(iInputFileName, "#{iTempDir}/_#{lBaseFileName}_#{iName}.wav", 'DrawFct', "--function \"#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
       end
       

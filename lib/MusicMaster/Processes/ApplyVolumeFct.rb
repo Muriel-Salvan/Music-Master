@@ -31,7 +31,7 @@ module MusicMaster
         lFunctionFile = "#{iTempDir}/#{File.basename(iInputFileName)[0..-5]}.fct.rb"
         lFunction = WSK::Functions::Function.new
         lFunction.set(iParams[:Function])
-        lFunction.writeToFile(lFunctionFile)
+        lFunction.write_to_file(lFunctionFile)
         wsk(iInputFileName, iOutputFileName, 'ApplyVolumeFct', "--function \"#{lFunctionFile}\" --begin \"#{iParams[:Begin]}\" --end \"#{iParams[:End]}\" --unitdb #{(iParams[:DBUnits]) ? '1' : '0'}")
       end
 
