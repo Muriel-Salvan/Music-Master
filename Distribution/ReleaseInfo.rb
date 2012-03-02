@@ -5,27 +5,27 @@
 
 RubyPackager::ReleaseInfo.new.
   author(
-    :Name => 'Muriel Salvan',
-    :EMail => 'muriel@x-aeon.com',
-    :WebPageURL => 'http://murielsalvan.users.sourceforge.net'
+    :name => 'Muriel Salvan',
+    :email => 'muriel@x-aeon.com',
+    :web_page_url => 'http://murielsalvan.users.sourceforge.net'
   ).
   project(
-    :Name => 'MusicMaster',
-    :WebPageURL => 'http://musicmaster.sourceforge.net/',
-    :Summary => 'Command line tool helping recording, mixing and mastering music tracks and albums.',
-    :Description => 'Command line tool handling steps to deliver music album masters from recordings. Handle Track Mixing, Track Mastering, Track Master Delivery, Album Mastering and Album Master Delivery. Easy-to-use configuration files drive the complete processes.',
-    :ImageURL => 'http://musicmaster.sourceforge.net/wiki/images/d/d4/Logo.jpg',
-    :FaviconURL => 'http://musicmaster.sourceforge.net/wiki/images/2/26/Favicon.png',
-    :SVNBrowseURL => 'http://musicmaster.svn.sourceforge.net/viewvc/musicmaster/',
-    :DevStatus => 'Alpha'
+    :name => 'MusicMaster',
+    :web_page_url => 'http://musicmaster.sourceforge.net/',
+    :summary => 'Command line tool helping recording, mixing and mastering music tracks and albums.',
+    :description => 'Command line tool handling steps to deliver music album masters from recordings. Handle Track Mixing, Track Mastering, Track Master Delivery, Album Mastering and Album Master Delivery. Easy-to-use configuration files drive the complete processes.',
+    :image_url => 'http://musicmaster.sourceforge.net/wiki/images/d/d4/Logo.jpg',
+    :favicon_url => 'http://musicmaster.sourceforge.net/wiki/images/2/26/Favicon.png',
+    :browse_source_url => 'http://github.com/Muriel-Salvan/Music-Master',
+    :dev_status => 'Beta'
   ).
-  addCoreFiles( [
+  add_core_files( [
     '{lib,bin}/**/*'
   ] ).
-#  addTestFiles( [
-#    'test/**/*'
-#  ] ).
-  addAdditionalFiles( [
+  add_test_files( [
+    'test/**/*'
+  ] ).
+  add_additional_files( [
     'README',
     'LICENSE',
     'AUTHORS',
@@ -34,51 +34,55 @@ RubyPackager::ReleaseInfo.new.
     '*.example'
   ] ).
   gem(
-    :GemName => 'MusicMaster',
-    :GemPlatformClassName => 'Gem::Platform::RUBY',
-    :RequirePath => 'lib',
-    :HasRDoc => true,
-#    :TestFile => 'test/run.rb',
-    :GemDependencies => [
-      [ 'WaveSwissKnife', '>= 0.0.1' ],
-      [ 'rake', '>= 0.9' ]
+    :gem_name => 'MusicMaster',
+    :gem_platform_class_name => 'Gem::Platform::RUBY',
+    :require_path => 'lib',
+    :has_rdoc => true,
+    :test_file => 'test/run.rb',
+    :gem_dependencies => [
+      [ 'rake', '>= 0.9' ],
+      [ 'rUtilAnts', '>= 1.0' ],
+      [ 'WaveSwissKnife', '>= 0.0.1' ]
     ]
   ).
-  sourceForge(
-    :Login => 'murielsalvan',
-    :ProjectUnixName => 'musicmaster'
+  source_forge(
+    :login => 'murielsalvan',
+    :project_unix_name => 'musicmaster',
+    :ask_for_key_passphrase => true
   ).
-  rubyForge(
-    :ProjectUnixName => 'musicmaster'
+  ruby_forge(
+    :project_unix_name => 'musicmaster'
+  ).
+#  executable(
+#    :startup_rb_file => 'bin/Album.rb'
+#  ).
+#  executable(
+#    :startup_rb_file => 'bin/AnalyzeAlbum.rb'
+#  ).
+  executable(
+    :startup_rb_file => 'bin/Calibrate.rb'
   ).
   executable(
-    :StartupRBFile => 'bin/Album.rb'
+    :startup_rb_file => 'bin/Clean.rb'
   ).
   executable(
-    :StartupRBFile => 'bin/AnalyzeAlbum.rb'
+    :startup_rb_file => 'bin/DBConvert.rb'
   ).
   executable(
-    :StartupRBFile => 'bin/DBConvert.rb'
+    :startup_rb_file => 'bin/Deliver.rb'
+  ).
+#  executable(
+#    :startup_rb_file => 'bin/DeliverAlbum.rb'
+#  ).
+#  executable(
+#    :startup_rb_file => 'bin/Fct2Wave.rb'
+#  ).
+  executable(
+    :startup_rb_file => 'bin/Mix.rb'
   ).
   executable(
-    :StartupRBFile => 'bin/Deliver.rb'
+    :startup_rb_file => 'bin/Process.rb'
   ).
   executable(
-    :StartupRBFile => 'bin/DeliverAlbum.rb'
-  ).
-  executable(
-    :StartupRBFile => 'bin/Fct2Wave.rb'
-  ).
-  executable(
-    :StartupRBFile => 'bin/Master.rb'
-  ).
-  executable(
-    :StartupRBFile => 'bin/Mix.rb'
-  ).
-  executable(
-    :StartupRBFile => 'bin/PrepareMix.rb'
-  ).
-  executable(
-    :StartupRBFile => 'bin/Record.rb'
+    :startup_rb_file => 'bin/Record.rb'
   )
-
