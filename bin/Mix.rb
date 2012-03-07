@@ -44,13 +44,11 @@ module MusicMaster
 
     # Initialize Rake processes and return the task to be built
     #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
     # Return::
     # * _Symbol_: Rake target to execute
-    def getRakeTarget(iConf)
+    def getRakeTarget
       initialize_RakeProcesses(:LstMixNames => @LstMixNames)
-      generateRakeFor_Mix(iConf)
+      generateRakeFor_Mix
 
       return :Mix
     end

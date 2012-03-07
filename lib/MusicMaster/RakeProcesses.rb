@@ -55,7 +55,6 @@ module MusicMaster
       # * *:LstEnvToRecord* (<em>list<Symbol></em>): The list of recording environments to record. An empty list means all environments.
       # * *:LstMixNames* (_String_): Names of the mix to produce. Can be empty to produce all mixes.
       # * *:LstDeliverNames* (_String_): Names of the deliverables to produce. Can be empty to produce all deliverables.
-      # * *:MixConf* (<em>map<String,map<Symbol,Object>></em>): Mix configuration, directly taken from the config file
       # * *:FinalMixSources* (<em>map<Object,Symbol></em>): List of all tasks defining source files, per mix TrackID
       # * *:DeliverableConf* (<em>map<String,[map<Symbol,Object>,map<Symbol,Object>]></em>): The deliverable information, per deliverable file name: [FormatConfig, Metadata]
       # * *:Deliverables* (<em>map<String,map<Symbol,Object>></em>): Data associated to a deliverable, per deliverable name (from the config file):
@@ -75,7 +74,6 @@ module MusicMaster
         :LstEnvToRecord => [],
         :LstMixNames => [],
         :LstDeliverableNames => [],
-        :MixConf => {},
         :FinalMixSources => {},
         :DeliverableConf => {},
         :Deliverables => {}
@@ -95,14 +93,11 @@ module MusicMaster
     end
 
     # Generate rake targets for generating source files
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_GenerateSourceFiles(iConf)
+    def generateRakeFor_GenerateSourceFiles
       lLstGlobalRecordTasks = []
 
       # 1. Recordings
-      lRecordingsConf = iConf[:Recordings]
+      lRecordingsConf = @RecordConf[:Recordings]
       if (lRecordingsConf != nil)
         # Generate recordings rules
         # Gather the recording environments and their respective file names to produce
@@ -193,7 +188,7 @@ module MusicMaster
       end
 
       # 2. Wave files
-      lWaveFilesConf = iConf[:WaveFiles]
+      lWaveFilesConf = @RecordConf[:WaveFiles]
       if (lWaveFilesConf != nil)
         # Generate wave files rules
         lLstWaveFiles = []
@@ -224,18 +219,15 @@ module MusicMaster
     end
 
     # Generate rake targets for cleaning recorded files
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_CleanRecordings(iConf)
+    def generateRakeFor_CleanRecordings
       if (!@Context[:RakeSetupFor_GenerateSourceFiles])
-        generateRakeFor_GenerateSourceFiles(iConf)
+        generateRakeFor_GenerateSourceFiles
       end
 
       # List of cleaning tasks
       # list< Symbol >
       lLstCleanTasks = []
-      lRecordingsConf = iConf[:Recordings]
+      lRecordingsConf = @RecordConf[:Recordings]
       if (lRecordingsConf != nil)
         lTracksConf = lRecordingsConf[:Tracks]
         if (lTracksConf != nil)
@@ -277,18 +269,15 @@ module MusicMaster
     end
 
     # Generate rake targets for calibrating recorded files
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_CalibrateRecordings(iConf)
+    def generateRakeFor_CalibrateRecordings
       if (!@Context[:RakeSetupFor_CleanRecordings])
-        generateRakeFor_CleanRecordings(iConf)
+        generateRakeFor_CleanRecordings
       end
 
       # List of calibrating tasks
       # list< Symbol >
       lLstCalibrateTasks = []
-      lRecordingsConf = iConf[:Recordings]
+      lRecordingsConf = @RecordConf[:Recordings]
       if (lRecordingsConf != nil)
         lTracksConf = lRecordingsConf[:Tracks]
         if (lTracksConf != nil)
@@ -401,12 +390,9 @@ module MusicMaster
     end
 
     # Generate rake targets for processing source files
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_ProcessSourceFiles(iConf)
+    def generateRakeFor_ProcessSourceFiles
       if (!@Context[:RakeSetupFor_CalibrateRecordings])
-        generateRakeFor_CalibrateRecordings(iConf)
+        generateRakeFor_CalibrateRecordings
       end
 
       # List of process tasks
@@ -414,7 +400,7 @@ module MusicMaster
       lLstProcessTasks = []
 
       # 1. Handle recordings
-      lRecordingsConf = iConf[:Recordings]
+      lRecordingsConf = @RecordConf[:Recordings]
       if (lRecordingsConf != nil)
         # Read global processes and environment processes to be applied before and after recordings
         lGlobalProcesses_Before = lRecordingsConf[:GlobalProcesses_Before] || []
@@ -495,7 +481,7 @@ module MusicMaster
       end
 
       # 2. Handle Wave files
-      lWaveFilesConf = iConf[:WaveFiles]
+      lWaveFilesConf = @RecordConf[:WaveFiles]
       if (lWaveFilesConf != nil)
         lGlobalProcesses_Before = lWaveFilesConf[:GlobalProcesses_Before] || []
         lGlobalProcesses_After = lWaveFilesConf[:GlobalProcesses_After] || []
@@ -567,21 +553,18 @@ module MusicMaster
     end
 
     # Generate rake targets for the mix
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_Mix(iConf)
+    def generateRakeFor_Mix
       if (!@Context[:RakeSetupFor_ProcessSourceFiles])
-        generateRakeFor_ProcessSourceFiles(iConf)
+        generateRakeFor_ProcessSourceFiles
       end
 
-      lMixConf = iConf[:Mix]
+      lMixConf = @RecordConf[:Mix]
       if (lMixConf != nil)
 
         # Create a map of all possible TrackIDs, with their corresponding target containing the file name as part of its data
         # map< Object, Symbol >
         lFinalSources = {}
-        lRecordingsConf = iConf[:Recordings]
+        lRecordingsConf = @RecordConf[:Recordings]
         if (lRecordingsConf != nil)
           lTracksConf = lRecordingsConf[:Tracks]
           if (lTracksConf != nil)
@@ -590,7 +573,7 @@ module MusicMaster
             end
           end
         end
-        lWaveConf = iConf[:WaveFiles]
+        lWaveConf = @RecordConf[:WaveFiles]
         if (lWaveConf != nil)
           lFilesList = lWaveConf[:FilesList]
           if (lFilesList != nil)
@@ -607,13 +590,12 @@ module MusicMaster
         # Use this info to generate needed targets
         lLstTargets = []
         lMixConf.keys.sort.each do |iMixName|
-          lLstTargets << generateRakeForMix(iMixName, iConf, lFinalSources) if (@Context[:LstMixNames].empty?) or (@Context[:LstMixNames].include?(iMixName))
+          lLstTargets << generateRakeForMix(iMixName, lFinalSources) if (@Context[:LstMixNames].empty?) or (@Context[:LstMixNames].include?(iMixName))
         end
 
         desc 'Produce all mixes'
         task :Mix => lLstTargets
 
-        @Context[:MixConf] = lMixConf
         @Context[:FinalMixSources] = lFinalSources
       end
 
@@ -621,21 +603,18 @@ module MusicMaster
     end
 
     # Generate rake targets for the deliverables
-    #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
-    def generateRakeFor_Deliver(iConf)
+    def generateRakeFor_Deliver
       if (!@Context[:RakeSetupFor_Mix])
-        generateRakeFor_Mix(iConf)
+        generateRakeFor_Mix
       end
       lLstTargets = []
-      lDeliverConf = iConf[:Deliver]
+      lDeliverConf = @RecordConf[:Deliver]
       if (lDeliverConf != nil)
         lDeliverablesConf = lDeliverConf[:Deliverables]
         if (lDeliverablesConf != nil)
           # Use this info to generate needed targets
           lDeliverablesConf.keys.sort.each do |iDeliverableName|
-            lLstTargets << generateRakeForDeliver(iDeliverableName, iConf) if (@Context[:LstDeliverableNames].empty?) or (@Context[:LstDeliverableNames].include?(iDeliverableName))
+            lLstTargets << generateRakeForDeliver(iDeliverableName) if (@Context[:LstDeliverableNames].empty?) or (@Context[:LstDeliverableNames].include?(iDeliverableName))
           end
         end
       end
@@ -849,11 +828,10 @@ module MusicMaster
     #
     # Parameters::
     # * *iMixName* (_String_): The name of the mix to produce targets for
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
     # * *iFinalSources* (<em>map<Object,String></em>): The set of possible sources, per Track ID (can be alias, mix name, tracks list, wave name)
     # Return::
     # * _Symbol_: Name of the top-level target producing the mix
-    def generateRakeForMix(iMixName, iConf, iFinalSources)
+    def generateRakeForMix(iMixName, iFinalSources)
       rTarget = "Mix_#{iMixName}".to_sym
 
       # If the target already exists, do nothing
@@ -888,7 +866,7 @@ module MusicMaster
         # Use the corresponding final mix task to create the whole processing chain
         # First, compute dependencies of the final mix task
         lLstDeps = []
-        iConf[:Mix][iMixName][:Tracks].keys.sort.each do |iTrackID|
+        @RecordConf[:Mix][iMixName][:Tracks].keys.sort.each do |iTrackID|
           raise UnknownTrackIDError, "TrackID #{iTrackID} is not defined in the configuration for the mix." if (iFinalSources[iTrackID] == nil)
           lLstDeps << iFinalSources[iTrackID]
         end
@@ -897,7 +875,7 @@ module MusicMaster
         task lFinalMixTask => lLstDeps do |iTask|
           # This task is responsible for creating the whole processing chain from the source files (taken from prerequisites' data), and storing the top-level file name as its data.
           lMixName = iTask.name.match(/^FinalMix_(.*)$/)[1]
-          lMixConf = @Context[:MixConf][lMixName]
+          lMixConf = @RecordConf[:Mix][lMixName]
           lFinalMixFileName = nil
           if (lMixConf[:Tracks].size == 1)
             # Just 1 source for this mix
@@ -967,20 +945,19 @@ module MusicMaster
     #
     # Parameters::
     # * *iDeliverableName* (_String_): The name of the deliverable to produce targets for
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
     # Return::
     # * _Symbol_: Name of the top-level target producing the deliverable
-    def generateRakeForDeliver(iDeliverableName, iConf)
+    def generateRakeForDeliver(iDeliverableName)
       rTarget = "Deliver_#{iDeliverableName}".to_sym
 
-      lDeliverableConf = iConf[:Deliver][:Deliverables][iDeliverableName]
+      lDeliverableConf = @RecordConf[:Deliver][:Deliverables][iDeliverableName]
 
       # Get metadata
       # Default values
       lMetadata = {
         :FileName => 'Track'
       }
-      lMetadata.merge!(iConf[:Deliver][:Metadata]) if (iConf[:Deliver][:Metadata] != nil)
+      lMetadata.merge!(@RecordConf[:Deliver][:Metadata]) if (@RecordConf[:Deliver][:Metadata] != nil)
       lMetadata.merge!(lDeliverableConf[:Metadata]) if (lDeliverableConf[:Metadata] != nil)
 
       # Get the format
@@ -988,7 +965,7 @@ module MusicMaster
       lFormatConf = {
         :FileFormat => 'Wave'
       }
-      lFormatConf.merge!(iConf[:Deliver][:Formats][lDeliverableConf[:Format]]) if (lDeliverableConf[:Format] != nil)
+      lFormatConf.merge!(@RecordConf[:Deliver][:Formats][lDeliverableConf[:Format]]) if (lDeliverableConf[:Format] != nil)
 
       # Call the format plugin
       access_plugin('Formats', lFormatConf[:FileFormat]) do |iFormatPlugin|

@@ -72,27 +72,30 @@ module MusicMaster
           end
           if (lError == nil)
             # Read configuration
-            lError, lConf = readConf(lConfFileName)
+            lError, lRecordConf = readConf(lConfFileName)
             if (lError == nil)
               # Check the conf. This is dependent on the process
-              lError = checkConf(lConf)
-              initialize_Utils
-              begin
-                lRakeTarget = getRakeTarget(lConf)
-              rescue
-                lError = $!
-              end
+              lError = checkConf(lRecordConf)
               if (lError == nil)
-                if debug_activated?
-                  Rake::application.options.trace = true
-                  displayRakeTasks
-                end
+                @RecordConf = lRecordConf
+                initialize_Utils
                 begin
-                  Rake::Task[lRakeTarget].invoke
+                  lRakeTarget = getRakeTarget
                 rescue
                   lError = $!
                 end
-                log_info 'Processed finished successfully.' if (lError == nil)
+                if (lError == nil)
+                  if debug_activated?
+                    Rake::application.options.trace = true
+                    displayRakeTasks
+                  end
+                  begin
+                    Rake::Task[lRakeTarget].invoke
+                  rescue
+                    lError = $!
+                  end
+                  log_info 'Processed finished successfully.' if (lError == nil)
+                end
               end
             end
           end
@@ -135,11 +138,9 @@ module MusicMaster
 
     # Initialize Rake processes and return the task to be built
     #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
     # Return::
     # * _Symbol_: Rake target to execute
-    def getRakeTarget(iConf)
+    def getRakeTarget
       return nil
     end
 

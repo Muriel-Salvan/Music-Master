@@ -76,13 +76,11 @@ module MusicMaster
 
     # Initialize Rake processes and return the task to be built
     #
-    # Parameters::
-    # * *iConf* (<em>map<Symbol,Object></em>): The configuration
     # Return::
     # * _Symbol_: Rake target to execute
-    def getRakeTarget(iConf)
+    def getRakeTarget
       initialize_RakeProcesses(:RecordedFilesPrepared => @RecordedFilesPrepared, :LstEnvToRecord => @LstEnvToRecord)
-      generateRakeFor_GenerateSourceFiles(iConf)
+      generateRakeFor_GenerateSourceFiles
 
       return :GenerateSourceFiles
     end
