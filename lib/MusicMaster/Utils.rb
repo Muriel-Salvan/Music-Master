@@ -4,6 +4,7 @@
 #++
 
 require 'pp'
+require 'tmpdir'
 
 module MusicMaster
 
@@ -68,7 +69,8 @@ module MusicMaster
     # * *iWaveFile* (_String_): The wav file to analyze
     # * *iFFTProfileFile* (_String_): The analysis file to store into
     def fftProfileFile(iWaveFile, iFFTProfileFile)
-      lDummyFile = "#{$MusicMasterConf[:PrepareMix][:TempDir]}/Dummy.wav"
+      lDummyFile = "#{Dir.tmpdir}/MusicMaster/Dummy.wav"
+      FileUtils::mkdir_p(File.dirname(lDummyFile))
       wsk(iWaveFile, lDummyFile, 'FFT')
       File.unlink(lDummyFile)
       FileUtils::mkdir_p(File.dirname(iFFTProfileFile))
@@ -81,7 +83,8 @@ module MusicMaster
     # * *iWaveFile* (_String_): The wav file to analyze
     # * *iAnalysisFile* (_String_): The analysis file to store into
     def analyzeFile(iWaveFile, iAnalysisFile)
-      lDummyFile = "#{$MusicMasterConf[:PrepareMix][:TempDir]}/Dummy.wav"
+      lDummyFile = "#{Dir.tmpdir}/MusicMaster/Dummy.wav"
+      FileUtils::mkdir_p(File.dirname(lDummyFile))
       wsk(iWaveFile, lDummyFile, 'Analyze')
       File.unlink(lDummyFile)
       FileUtils::mkdir_p(File.dirname(iAnalysisFile))
@@ -161,9 +164,11 @@ module MusicMaster
     #
     # Parameters::
     # * *iAnalysisFileName* (_String_): Name of the file containing analysis
+    # * *iOptions* (<em>map<Symbol,Object></em>): Additional options [optional = {}]
+    #   * *:margin* (_Float_): The margin to be added, in terms of fraction of the maximal signal value [optional = 0.0]
     # Return::
     # * <em>list< [Integer,Integer] ></em>: The [min,max] values, per channel
-    def getThresholds(iAnalysisFileName)
+    def getThresholds(iAnalysisFileName, iOptions = {})
       rThresholds = []
 
       if (@Cache[:Thresholds][iAnalysisFileName] == nil)
@@ -171,12 +176,13 @@ module MusicMaster
         lSilenceAnalyze = getAnalysis(iAnalysisFileName)
         # Compute the DC offsets
         lSilenceDCOffsets = lSilenceAnalyze[:MoyValues].map { |iValue| iValue.round }
+        lMargin = iOptions[:margin] || 0.0
         lSilenceAnalyze[:MaxValues].each_with_index do |iMaxValue, iIdxChannel|
           # Remove silence DC Offset
           lCorrectedMinValue = lSilenceAnalyze[:MinValues][iIdxChannel] - lSilenceDCOffsets[iIdxChannel]
           lCorrectedMaxValue = iMaxValue - lSilenceDCOffsets[iIdxChannel]
           # Compute the silence threshold by adding the margin
-          rThresholds << [(lCorrectedMinValue-lCorrectedMinValue.abs*$MusicMasterConf[:PrepareMix][:MarginSilenceThresholds]).to_i, (lCorrectedMaxValue+lCorrectedMaxValue.abs*$MusicMasterConf[:PrepareMix][:MarginSilenceThresholds]).to_i]
+          rThresholds << [(lCorrectedMinValue-lCorrectedMinValue.abs*lMargin).to_i, (lCorrectedMaxValue+lCorrectedMaxValue.abs*lMargin).to_i]
         end
         @Cache[:Thresholds][iAnalysisFileName] = rThresholds
       else

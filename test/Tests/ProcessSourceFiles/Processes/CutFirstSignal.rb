@@ -20,7 +20,8 @@ module MusicMasterTest
                     :Name => 'Wave.wav',
                     :Processes => [
                       {
-                        :Name => 'CutFirstSignal'
+                        :Name => 'CutFirstSignal',
+                        :SilenceMin => '1s'
                       }
                     ]
                   }

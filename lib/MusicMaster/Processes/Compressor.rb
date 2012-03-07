@@ -29,6 +29,9 @@ module MusicMaster
       # -Infinity
       MINUS_INFINITY = -1.0/0.0
 
+      # Interval used to profile the volume
+      PROFILEVOLUME_INTERVAL = '0.1s'
+
       # Execute the process
       #
       # Parameters::
@@ -74,7 +77,7 @@ module MusicMaster
           else
             lTempWaveFile = "#{iTempDir}/Dummy.wav"
             # Get the volume profile
-            wsk(iInputFileName, lTempWaveFile, 'VolumeProfile', "--function \"#{lTempVolProfileFile}\" --begin 0 --end -1 --interval \"#{$MusicMasterConf[:Compressor][:Interval]}\" --rmsratio #{iParams[:RMSRatio]}")
+            wsk(iInputFileName, lTempWaveFile, 'VolumeProfile', "--function \"#{lTempVolProfileFile}\" --begin 0 --end -1 --interval \"#{PROFILEVOLUME_INTERVAL}\" --rmsratio #{iParams[:RMSRatio]}")
             File::unlink(lTempWaveFile)
           end
 

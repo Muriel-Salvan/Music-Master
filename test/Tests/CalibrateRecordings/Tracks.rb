@@ -48,14 +48,14 @@ module MusicMasterTest
         :FakeWSK => [
           {
             :Input => '02_Clean/Record/Calibration.Env1.Env2.04.NoiseGate.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env1.Env2.04.NoiseGate.analyze' => 'analyze.result' }
           },
           {
             :Input => '02_Clean/Record/Calibration.Env2.Env1.04.NoiseGate.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env2.Env1.04.NoiseGate.analyze' => 'analyze.result' }
@@ -96,14 +96,14 @@ module MusicMasterTest
         :FakeWSK => [
           {
             :Input => '02_Clean/Record/Calibration.Env1.Env4.04.NoiseGate.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env1.Env4.04.NoiseGate.analyze' => 'analyze.result' }
           },
           {
             :Input => '02_Clean/Record/Calibration.Env4.Env1.04.NoiseGate.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env4.Env1.04.NoiseGate.analyze' => 'analyze.result' }

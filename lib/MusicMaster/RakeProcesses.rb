@@ -719,12 +719,12 @@ module MusicMaster
         # Get DC offset from the recorded file
         lOffset, lDCOffsets = getDCOffsets(iAnalyzeRecordedFileName)
         # Get thresholds (without DC offsets) from the silence file
-        lSilenceThresholds = getThresholds(iAnalyzeSilenceFileName)
+        lSilenceThresholds = getThresholds(iAnalyzeSilenceFileName, :margin => $MusicMasterConf[:Clean][:MarginSilenceThresholds])
         # Get the thresholds with the recorded DC offset, and prepare them to be given to wsk
         lLstStrSilenceThresholdsWithDC = shiftThresholdsByDCOffset(lSilenceThresholds, lDCOffsets).map { |iSilenceThresholdInfo| iSilenceThresholdInfo.join(',') }
 
         # Call wsk
-        wsk(iRecordedFileName, iTask.name, 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{iFFTProfileSilenceFileName}\"")
+        wsk(iRecordedFileName, iTask.name, 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iFFTProfileSilenceFileName}\"")
       end
 
       # Cut the file if needed
@@ -787,9 +787,9 @@ module MusicMaster
         # Prerequisites list has been setup by the first prerequisite execution
         iSourceFileName, iRecordedAnalysisFileName, iSilenceAnalysisFileName, iSilenceFFTProfileFileName = iTask.prerequisites[1..4]
         # Get thresholds (without DC offsets) from the silence file
-        lSilenceThresholds = getThresholds(iSilenceAnalysisFileName)
+        lSilenceThresholds = getThresholds(iSilenceAnalysisFileName, :margin => $MusicMasterConf[:Clean][:MarginSilenceThresholds])
         lLstStrSilenceThresholds = lSilenceThresholds.map { |iThreshold| iThreshold.join(',') }
-        wsk(iSourceFileName, iTask.name, 'NoiseGate', "--silencethreshold \"#{lLstStrSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:NoiseGate][:Attack]} --release #{$MusicMasterConf[:NoiseGate][:Release]} --silencemin #{$MusicMasterConf[:NoiseGate][:SilenceMin]} --noisefft \"#{iSilenceFFTProfileFileName}\"")
+        wsk(iSourceFileName, iTask.name, 'NoiseGate', "--silencethreshold \"#{lLstStrSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:Clean][:Attack]} --release #{$MusicMasterConf[:Clean][:Release]} --silencemin #{$MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iSilenceFFTProfileFileName}\"")
       end
 
       # Create embracing task

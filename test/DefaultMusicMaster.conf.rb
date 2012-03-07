@@ -10,14 +10,43 @@
   # Uncomment the following to convert real Wave files if there is a working SSRC installation
   #:WSKCmdLine => "WSK.rb",
 
+  # Directories used
+  :Directories => {
+
+    # Directory to record files to
+    :Record => '01_Source/Record',
+
+    # Directory to store static audio files to
+    :Wave => '01_Source/Wave',
+
+    # Directory to store analysis results of recorded files to
+    :AnalyzeRecord => 'Analyze/Record',
+
+    # Directory to clean files to
+    :Clean => '02_Clean/Record',
+
+    # Directory to calibrate files to
+    :Calibrate => '03_Calibrate/Record',
+
+    # Directory to process static audio files to
+    :ProcessWave => '04_Process/Wave',
+
+    # Directory to process recorded files to
+    :ProcessRecord => '04_Process/Record',
+
+    # Directory to mix files to
+    :Mix => '05_Mix',
+
+    # Directory storing links to final mix files
+    :FinalMix => '05_Mix/Final',
+
+    # Directory to deliver files to
+    :Deliver => '06_Deliver'
+
+  },
+
   # Record options
   :Record => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'RecordTemp',
-
-    # Directory in which recorded Wave files are stored
-    :WaveDir => 'WaveSrc',
 
     # Method returning the name of the next recorded file
     :RecordedFileGetter => Proc.new do
@@ -44,76 +73,18 @@
 
   },
 
-  # PrepareMix options
-  :PrepareMix => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'PrepareMixTemp',
+  # Options used when cleaning recorded files
+  :Clean => {
 
     # Percentage of values added as a margin of the silence thresholds (arbitrary value)
+    # A value of 0.1 means that if the silence recording has thresholds from X to Y values, then we consider the silence thresholds to be from X-0.1*MaxValue to Y+0.1*MaxValue, MaxValue being the maximal value for the audio bit depth.
     :MarginSilenceThresholds => 0.1,
-
-  },
-
-  # Mix options
-  :Mix => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'MixTemp'
-
-  },
-
-  # Master options
-  :Master => {
-
-    # Directory in which files will be generated
-    :Dir => 'Master'
-
-  },
-
-  # Album options
-  :Album => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'AlbumTemp',
-
-    # Directory in which files will be generated
-    :Dir => 'Album'
-
-  },
-
-  # Album delivery options
-  :AlbumDeliver => {
-
-    # Directory in which files will be generated
-    :Dir => 'AlbumDeliver'
-
-  },
-
-  # Single Track delivery options
-  :Deliver => {
-
-    # Directory in which files will be generated
-    :Dir => 'Deliver'
-
-  },
-
-  # Options for NoiseGate processes
-  :NoiseGate => {
 
     # Durations used for noise gates
     # !!! Attack + Release should be < SilenceMin !!!
     :Attack => '0.1s',
     :Release => '0.1s',
     :SilenceMin => '1s'
-
-  },
-
-  # Options for Compressor processes
-  :Compressor => {
-
-    # Interval used to measure volume
-    :Interval => '0.1s'
 
   }
 

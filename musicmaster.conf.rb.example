@@ -1,97 +1,70 @@
 {
 
   # Command line to run WSK tool
-  :WSKCmdLine => 'ruby -w -S WSK.rb',
+  :WSKCmdLine => 'WSK.rb',
 
   # Command line to run Sample Rate Converter tool
   :SRCCmdLine => '/path/to/ssrc/ssrc.exe',
 
+  # Directories used
+  :Directories => {
+
+    # Directory to record files to
+    :Record => 'MusicMaster/Record',
+
+    # Directory to store static audio files to
+    :Wave => 'MusicMaster/Wave',
+
+    # Directory to store analysis results of recorded files to
+    :AnalyzeRecord => 'MusicMaster/AnalyzeRecord',
+
+    # Directory to clean files to
+    :Clean => 'MusicMaster/Clean',
+
+    # Directory to calibrate files to
+    :Calibrate => 'MusicMaster/Calibrate',
+
+    # Directory to process static audio files to
+    :ProcessWave => 'MusicMaster/Process/Wave',
+
+    # Directory to process recorded files to
+    :ProcessRecord => 'MusicMaster/Process/Record',
+
+    # Directory to mix files to
+    :Mix => 'MusicMaster/Mix',
+
+    # Directory storing links to final mix files
+    :FinalMix => 'MusicMaster/Mix/Final',
+
+    # Directory to deliver files to
+    :Deliver => 'MusicMaster/Deliver'
+
+  },
+
   # Record options
   :Record => {
 
-    # Directory in which temporary files will be generated
-    :TempDir => 'RecordTemp',
-
-    # Directory in which recorded Wave files are stored
-    :WaveDir => 'WaveSrc',
-
-    # Method returning the name of the next recorded file
+    # Method returning the name of the next recorded file.
+    # Files returned from this proc will be moved to the Record directory of MusicMaster.
+    # Don't forget to make a copy first if you want to keep them in the original location also.
     :RecordedFileGetter => Proc.new do
       next `ls -rt /path/to/recorded/files/*.wav | tail -1 | head -1`.chomp
     end
 
   },
 
-  # PrepareMix options
-  :PrepareMix => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'PrepareMixTemp',
+  # Options used when cleaning recorded files
+  :Clean => {
 
     # Percentage of values added as a margin of the silence thresholds (arbitrary value)
+    # A value of 0.1 means that if the silence recording has thresholds from X to Y values, then we consider the silence thresholds to be from X-0.1*MaxValue to Y+0.1*MaxValue, MaxValue being the maximal value for the audio bit depth.
     :MarginSilenceThresholds => 0.1,
-
-  },
-
-  # Mix options
-  :Mix => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'MixTemp'
-
-  },
-
-  # Master options
-  :Master => {
-
-    # Directory in which files will be generated
-    :Dir => 'Master'
-
-  },
-
-  # Album options
-  :Album => {
-
-    # Directory in which temporary files will be generated
-    :TempDir => 'AlbumTemp',
-
-    # Directory in which files will be generated
-    :Dir => 'Album'
-
-  },
-
-  # Album delivery options
-  :AlbumDeliver => {
-
-    # Directory in which files will be generated
-    :Dir => 'AlbumDeliver'
-
-  },
-
-  # Single Track delivery options
-  :Deliver => {
-
-    # Directory in which files will be generated
-    :Dir => 'Deliver'
-
-  },
-
-  # Options for NoiseGate processes
-  :NoiseGate => {
 
     # Durations used for noise gates
     # !!! Attack + Release should be < SilenceMin !!!
     :Attack => '0.1s',
     :Release => '0.1s',
     :SilenceMin => '1s'
-
-  },
-
-  # Options for Compressor processes
-  :Compressor => {
-
-    # Interval used to measure volume
-    :Interval => '0.1s'
 
   }
 

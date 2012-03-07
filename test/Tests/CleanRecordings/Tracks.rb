@@ -24,21 +24,21 @@ module MusicMasterTest
         :FakeWSK => [
           {
             :Input => '01_Source/Record/Env1.1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.1.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env1.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.Silence.analyze' => 'analyze.result' }
@@ -91,21 +91,21 @@ module MusicMasterTest
         :FakeWSK => [
           {
             :Input => '01_Source/Record/Env1.2.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.2.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env1.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.Silence.analyze' => 'analyze.result' }
@@ -155,21 +155,21 @@ module MusicMasterTest
           # Clean Track 1
           {
             :Input => '01_Source/Record/Env1.1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.1.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env1.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.Silence.analyze' => 'analyze.result' }
@@ -198,7 +198,7 @@ module MusicMasterTest
           # Clean Track 2
           {
             :Input => '01_Source/Record/Env1.2.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.2.analyze' => 'analyze.result' }
@@ -256,21 +256,21 @@ module MusicMasterTest
           # Clean Calibration Env1 Env2
           {
             :Input => '01_Source/Record/Calibration.Env1.Env2.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env1.Env2.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env1.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.Silence.analyze' => 'analyze.result' }
@@ -306,21 +306,21 @@ module MusicMasterTest
           # Clean Calibration Env2 Env1
           {
             :Input => '01_Source/Record/Calibration.Env2.Env1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env2.Env1.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env2.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env2.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env2.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env2.Silence.analyze' => 'analyze.result' }
@@ -356,7 +356,7 @@ module MusicMasterTest
           # Clean Track 1
           {
             :Input => '01_Source/Record/Env1.1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.1.analyze' => 'analyze.result' }
@@ -428,21 +428,21 @@ module MusicMasterTest
           # Clean Calibration Env1 Env3
           {
             :Input => '01_Source/Record/Calibration.Env1.Env3.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env1.Env3.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env1.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env1.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.Silence.analyze' => 'analyze.result' }
@@ -471,21 +471,21 @@ module MusicMasterTest
           # Clean Calibration Env3 Env1
           {
             :Input => '01_Source/Record/Calibration.Env3.Env1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Calibration.Env3.Env1.analyze' => 'analyze.result' }
           },
           {
             :Input => '01_Source/Record/Env3.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'FFT',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'FFT/Env3.Silence.fftprofile' => 'fft.result' }
           },
           {
             :Input => '01_Source/Record/Env3.Silence.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env3.Silence.analyze' => 'analyze.result' }
@@ -521,7 +521,7 @@ module MusicMasterTest
           # Clean Track 1
           {
             :Input => '01_Source/Record/Env1.1.wav',
-            :Output => 'PrepareMixTemp/Dummy.wav',
+            :Output => /^.*\/Dummy\.wav$/,
             :Action => 'Analyze',
             :UseWave => 'Empty.wav',
             :CopyFiles => { 'Analysis/Env1.1.analyze' => 'analyze.result' }

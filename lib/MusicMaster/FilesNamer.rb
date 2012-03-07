@@ -14,7 +14,79 @@ module MusicMaster
     # Return::
     # * _String_: Directory to record files to
     def getRecordedDir
-      return '01_Source/Record'
+      return $MusicMasterConf[:Directories][:Record]
+    end
+
+    # Get the directory in which static audio files are stored
+    #
+    # Return::
+    # * _String_: Directory to store static audio files to
+    def getWaveDir
+      return $MusicMasterConf[:Directories][:Wave]
+    end
+
+    # Get the directory in which recorded files are analyzed
+    #
+    # Return::
+    # * _String_: Directory to store analysis results of recorded files to
+    def getAnalyzedRecordedDir
+      return $MusicMasterConf[:Directories][:AnalyzeRecord]
+    end
+
+    # Get the directory in which files are cleaned
+    #
+    # Return::
+    # * _String_: Directory to clean files to
+    def getCleanedDir
+      return $MusicMasterConf[:Directories][:Clean]
+    end
+
+    # Get the directory in which files are calibrated
+    #
+    # Return::
+    # * _String_: Directory to calibrate files to
+    def getCalibratedDir
+      return $MusicMasterConf[:Directories][:Calibrate]
+    end
+
+    # Get the directory in which Wave files are processed
+    #
+    # Return::
+    # * _String_: Directory to process files to
+    def getProcessesWaveDir
+      return $MusicMasterConf[:Directories][:ProcessWave]
+    end
+
+    # Get the directory in which recorded files are processed
+    #
+    # Return::
+    # * _String_: Directory to process files to
+    def getProcessesRecordDir
+      return $MusicMasterConf[:Directories][:ProcessRecord]
+    end
+
+    # Get the directory in which mix files are processed
+    #
+    # Return::
+    # * _String_: Directory to mix files to
+    def getMixDir
+      return $MusicMasterConf[:Directories][:Mix]
+    end
+
+    # Get the directory in which final mix files are linked
+    #
+    # Return::
+    # * _String_: Directory storing links to final mix files
+    def getFinalMixDir
+      return $MusicMasterConf[:Directories][:FinalMix]
+    end
+
+    # Get the directory in which files are delivered
+    #
+    # Return::
+    # * _String_: Directory to deliver files to
+    def getDeliverDir
+      return $MusicMasterConf[:Directories][:Deliver]
     end
 
     # Get the recorded file name of a given list of tracks on a given environment
@@ -35,7 +107,7 @@ module MusicMaster
     # Return::
     # * _String_: Name of the Wave file
     def getRecordedSilenceFileName(iEnv)
-      return "01_Source/Record/#{iEnv}.Silence.wav"
+      return "#{getRecordedDir}/#{iEnv}.Silence.wav"
     end
 
     # Get the recorded calibration file name, recording from a recording environment in order to be compared later with a reference environment.
@@ -46,7 +118,7 @@ module MusicMaster
     # Return::
     # * _String_: Name of the Wave file
     def getRecordedCalibrationFileName(iEnvReference, iEnvRecording)
-      return "01_Source/Record/Calibration.#{iEnvRecording}.#{iEnvReference}.wav"
+      return "#{getRecordedDir}/Calibration.#{iEnvRecording}.#{iEnvReference}.wav"
     end
 
     # Get the calibrated recorded file name
@@ -56,7 +128,7 @@ module MusicMaster
     # Return::
     # * _String_: Name of the Wave file
     def getCalibratedFileName(iRecordedBaseName)
-      return "03_Calibrate/Record/#{iRecordedBaseName}.Calibrated.wav"
+      return "#{getCalibratedDir}/#{iRecordedBaseName}.Calibrated.wav"
     end
 
     # Get the name of a source wave file
@@ -71,7 +143,7 @@ module MusicMaster
         return iFileName
       else
         # We will generate a new one
-        return "01_Source/Wave/#{File.basename(iFileName)}"
+        return "#{getWaveDir}/#{File.basename(iFileName)}"
       end
     end
 
@@ -82,7 +154,7 @@ module MusicMaster
     # Return::
     # * _String_: The analysis file name
     def getRecordedAnalysisFileName(iBaseName)
-      return "Analyze/Record/#{iBaseName}.analyze"
+      return "#{getAnalyzedRecordedDir}/#{iBaseName}.analyze"
     end
 
     # Get the name of a FFT profike file taken from a recorded file
@@ -92,7 +164,7 @@ module MusicMaster
     # Return::
     # * _String_: The FFT profile file name
     def getRecordedFFTProfileFileName(iBaseName)
-      return "Analyze/Record/#{iBaseName}.fftprofile"
+      return "#{getAnalyzedRecordedDir}/#{iBaseName}.fftprofile"
     end
 
     # Get the name of the file generated after removing silences from it.
@@ -102,7 +174,7 @@ module MusicMaster
     # Return::
     # * _String_: The generated file name
     def getSilenceRemovedFileName(iBaseName)
-      return "02_Clean/Record/#{iBaseName}.01.SilenceRemover.wav"
+      return "#{getCleanedDir}/#{iBaseName}.01.SilenceRemover.wav"
     end
 
     # Get the name of the file generated after applying a cut from it.
@@ -113,7 +185,7 @@ module MusicMaster
     # Return::
     # * _String_: The generated file name
     def getCutFileName(iBaseName, iCutInfo)
-      return "02_Clean/Record/#{iBaseName}.02.Cut.#{iCutInfo.join('_')}.wav"
+      return "#{getCleanedDir}/#{iBaseName}.02.Cut.#{iCutInfo.join('_')}.wav"
     end
 
     # Get the name of the file generated after applying a DC remover from it.
@@ -123,7 +195,7 @@ module MusicMaster
     # Return::
     # * _String_: The generated file name
     def getDCRemovedFileName(iBaseName)
-      return "02_Clean/Record/#{iBaseName}.03.DCShifter.wav"
+      return "#{getCleanedDir}/#{iBaseName}.03.DCShifter.wav"
     end
 
     # Get the name of the file generated after applying a noise gate from it.
@@ -133,23 +205,7 @@ module MusicMaster
     # Return::
     # * _String_: The generated file name
     def getNoiseGateFileName(iBaseName)
-      return "02_Clean/Record/#{iBaseName}.04.NoiseGate.wav"
-    end
-
-    # Get the directory in which Wave files are processed
-    #
-    # Return::
-    # * _String_: Directory to process files to
-    def getProcessesWaveDir
-      return '04_Process/Wave'
-    end
-
-    # Get the directory in which recorded files are processed
-    #
-    # Return::
-    # * _String_: Directory to process files to
-    def getProcessesRecordDir
-      return '04_Process/Record'
+      return "#{getCleanedDir}/#{iBaseName}.04.NoiseGate.wav"
     end
 
     # Get the name of a file to processed
@@ -174,14 +230,6 @@ module MusicMaster
       end
     end
 
-    # Get the directory in which mix files are processed
-    #
-    # Return::
-    # * _String_: Directory to mix files to
-    def getMixDir
-      return '05_Mix'
-    end
-
     # Get the name of a file to be mixed
     #
     # Parameters::
@@ -197,15 +245,7 @@ module MusicMaster
     # Parameters::
     # * *iMixName* (_String_): Name of the mix
     def getFinalMixFileName(iMixName)
-      return "05_Mix/Final/#{iMixName}.wav"
-    end
-
-    # Get the directory in which files are delivered
-    #
-    # Return::
-    # * _String_: Directory to deliver files to
-    def getDeliverDir
-      return '06_Deliver'
+      return "#{getFinalMixDir}/#{iMixName}.wav"
     end
 
   end

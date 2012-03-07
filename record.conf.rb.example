@@ -340,13 +340,13 @@
       },
 
       'MP3 48k 320kbps' => {
-        :FileFormat => :MP3,
+        :FileFormat => 'MP3',
         :SampleRate => 48000,
         :BitRate => 320
       },
 
       'MP3 44k 128kbps' => {
-        :FileFormat => :MP3,
+        :FileFormat => 'MP3',
         :SampleRate => 44100,
         :BitRate => 128
       }
