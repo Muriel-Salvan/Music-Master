@@ -1,5 +1,33 @@
 = MusicMaster Release History
 
+== 1.0.0.20120307 (Beta)
+
+* No more global variable to store the configuration.
+* Moved SSRC configuration parameter to Wave format section only.
+* Removed obsolete configuration parameters.
+* Harmonized configuration parameters.
+* Added directories in MusicMaster configuration file.
+* Corrected record.conf.rb.example.
+* CutFirstSignal: Added the SilenceMin parameter.
+* Major rewriting, using Rake's mechanism.
+* Added complete regression testing.
+* Adapted release info to last version of RubyPackager.
+* Added tests in the release info.
+* Updated release info to new binaries.
+* Updated email address of Muriel Salvan.
+* Adapted comments to match a better RDoc syntax.
+* Adapted to new version of rUtilAnts.
+* Moved obsolete executables and libraries in old/ directories (to be ported and deleted later).
+* Don't apply volume corrections when useless.
+* Implemented a way to specify which Wave files are to be mixed, with volume correction and offset (see https://sourceforge.net/tracker/?func=detail&aid=3411403&group_id=356734&atid=1489604).
+* Temporary file names now use an MD5 hash to avoid conflicts with reused Wave files.
+* Changed examples for Wave files.
+* Migrated TODO list to Trackers.
+* Updated copyright information.
+* Migrated to GIT repository.
+* Cut: Added cut processing.
+* Bug correction: Compressor: Could not specify floating Ratios and Thresholds.
+
 == 0.0.1.20101110 (Alpha)
 
 * Initial public release.
