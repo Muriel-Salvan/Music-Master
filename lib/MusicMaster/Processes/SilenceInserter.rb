@@ -10,8 +10,8 @@ module MusicMaster
     class SilenceInserter
 
       # Parameters of this process:
-      # * *:Begin* (_String_): Length of silence to insert in samples or in float seconds (ie. 234 or 25.3s) at the beginning of the file
-      # * *:End* (_String_): Length of silence to insert in samples or in float seconds (ie. 234 or 25.3s) at the end of the file
+      # * *:Begin* (_String_): Length of silence to insert in samples or in float seconds (ie. '234' or '25.3s') at the beginning of the file
+      # * *:End* (_String_): Length of silence to insert in samples or in float seconds (ie. '234' or '25.3s') at the end of the file
 
       # Execute the process
       #

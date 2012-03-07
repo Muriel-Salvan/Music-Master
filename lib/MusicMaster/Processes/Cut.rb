@@ -9,6 +9,10 @@ module MusicMaster
 
     class Cut
 
+      # Parameters of this process:
+      # * *:Begin* (_String_): The begin marker (either in seconds or in samples)
+      # * *:End* (_String_): The end marker (either in seconds or in samples)
+
       # Execute the process
       #
       # Parameters::

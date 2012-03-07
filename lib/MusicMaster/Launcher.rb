@@ -50,8 +50,9 @@ module MusicMaster
       lConfFileName = nil
       begin
         lRemainingArgs = @Options.parse(iArgs)
-        if (lRemainingArgs.size != 1)
-          lError = RuntimeError.new("Please specify 1 config file (specified: \"#{lRemainingArgs.join(' ')}\"")
+        if ((lRemainingArgs.size != 1) and
+            (!@DisplayHelp))
+          lError = RuntimeError.new("Please specify 1 config file (specified: \"#{lRemainingArgs.join(' ')}\")")
         end
         lConfFileName = lRemainingArgs.first
       rescue Exception

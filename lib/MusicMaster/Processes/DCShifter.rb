@@ -10,7 +10,7 @@ module MusicMaster
     class DCShifter
 
       # Parameters of this process:
-      # * *:Offset* (_Integer_): The DC offset to apply to the file
+      # * *:Offset* (_Integer_): The DC offset to apply (can be negative). The value's effect depends on the bit depth. A value of 64 in a 8 bits file will shift 50%. A value of 64 in a 16 bits file will shift 0.2%.
 
       # Execute the process
       #
