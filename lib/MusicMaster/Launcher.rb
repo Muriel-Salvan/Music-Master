@@ -7,7 +7,6 @@ require 'fileutils'
 require 'optparse'
 require 'rUtilAnts/Logging'
 RUtilAnts::Logging::install_logger_on_object(:no_dialogs => true)
-require 'MusicMaster/ConfLoader'
 require 'MusicMaster/Utils'
 require 'MusicMaster/FilesNamer'
 require 'MusicMaster/RakeProcesses'
@@ -65,28 +64,36 @@ module MusicMaster
           if (@Debug)
             activate_log_debug(true)
           end
-          # Read configuration
-          lError, lConf = readConf(lConfFileName)
+          # Read the MusicMaster configuration
+          begin
+            @MusicMasterConf = get_musicmaster_conf
+          rescue Exception
+            lError = $!
+          end
           if (lError == nil)
-            # Check the conf. This is dependent on the process
-            lError = checkConf(lConf)
-            initialize_Utils
-            begin
-              lRakeTarget = getRakeTarget(lConf)
-            rescue
-              lError = $!
-            end
+            # Read configuration
+            lError, lConf = readConf(lConfFileName)
             if (lError == nil)
-              if debug_activated?
-                Rake::application.options.trace = true
-                displayRakeTasks
-              end
+              # Check the conf. This is dependent on the process
+              lError = checkConf(lConf)
+              initialize_Utils
               begin
-                Rake::Task[lRakeTarget].invoke
+                lRakeTarget = getRakeTarget(lConf)
               rescue
                 lError = $!
               end
-              log_info 'Processed finished successfully.' if (lError == nil)
+              if (lError == nil)
+                if debug_activated?
+                  Rake::application.options.trace = true
+                  displayRakeTasks
+                end
+                begin
+                  Rake::Task[lRakeTarget].invoke
+                rescue
+                  lError = $!
+                end
+                log_info 'Processed finished successfully.' if (lError == nil)
+              end
             end
           end
         end
@@ -141,6 +148,59 @@ module MusicMaster
     include FilesNamer
     include RakeProcesses
     include Utils
+
+    # Get the global MusicMaster configuration
+    # Read it from:
+    # 1. The environment variable MUSICMASTER_CONF_PATH
+    # 2. The installed MusicMaster directory
+    # 3. The current directory
+    #
+    # Return::
+    # * <em>map<Symbol,Object></em>: The MusicMaster configuration
+    def get_musicmaster_conf
+      rMusicMasterConf = nil
+
+      lConfSource = nil
+      # 1. Find from the environment
+      lConfigFileName = ENV['MUSICMASTER_CONF_PATH']
+      if (lConfigFileName == nil)
+        # 2. Find from the MusicMaster directory
+        lConfigFileName = "#{File.dirname(__FILE__)}/musicmaster.conf.rb"
+        if (File.exists?(lConfigFileName))
+          lConfSource = 'MusicMaster package local libraries'
+        else
+          # 3. Find from the current directory
+          lConfigFileName = "musicmaster.conf.rb"
+          if (File.exists?(lConfigFileName))
+            lConfSource = 'current directory'
+          else
+            # 4. Failure
+          end
+        end
+      else
+        lConfSource = 'MUSICMASTER_CONF_PATH environment variable'
+      end
+
+      # Check the configuration
+      if (lConfSource == nil)
+        raise "No MusicMaster configuration file could be found. You can set it by setting MUSICMASTER_CONF_PATH environment variable, or create a musicmaster.conf.rb file either in #{File.dirname(__FILE__)} or the current directory."
+      else
+        if (File.exists?(lConfigFileName))
+          File.open(lConfigFileName, 'r') do |iFile|
+            begin
+              rMusicMasterConf = eval(iFile.read)
+            rescue Exception
+              raise "Invalid configuration file #{lConfigFileName} specified in #{lConfSource}: #{$!}"
+              rMusicMasterConf = nil
+            end
+          end
+        else
+          raise "Missing file #{lConfigFileName}, specified in #{lConfSource}"
+        end
+      end
+
+      return rMusicMasterConf
+    end
 
     # Parse plugins
     def parsePlugins

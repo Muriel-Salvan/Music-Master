@@ -25,7 +25,7 @@ module MusicMaster
       # Analyze results, per Track
       lAnalyzeResults = []
       iConf[:Tracks].each_with_index do |iTrackInfo, iIdxTrack|
-        lTrackFileName = "#{$MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav"
+        lTrackFileName = "#{@MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav"
         wsk(lTrackFileName, 'Dummy.wav', 'Analyze')
         File.unlink('Dummy.wav')
         File.open('analyze.result', 'rb') do |iFile|

@@ -3,9 +3,6 @@
   # Command line to run WSK tool
   :WSKCmdLine => 'WSK.rb',
 
-  # Command line to run Sample Rate Converter tool
-  :SRCCmdLine => '/path/to/ssrc/ssrc.exe',
-
   # Directories used
   :Directories => {
 
@@ -65,6 +62,16 @@
     :Attack => '0.1s',
     :Release => '0.1s',
     :SilenceMin => '1s'
+
+  },
+
+  # Options used by delivery formats
+  :Formats => {
+
+    'Wave' => {
+      # Command line to run Sample Rate Converter tool
+      :SRCCmdLine => '/path/to/ssrc/ssrc.exe'
+    }
 
   }
 

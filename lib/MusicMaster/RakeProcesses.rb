@@ -719,12 +719,12 @@ module MusicMaster
         # Get DC offset from the recorded file
         lOffset, lDCOffsets = getDCOffsets(iAnalyzeRecordedFileName)
         # Get thresholds (without DC offsets) from the silence file
-        lSilenceThresholds = getThresholds(iAnalyzeSilenceFileName, :margin => $MusicMasterConf[:Clean][:MarginSilenceThresholds])
+        lSilenceThresholds = getThresholds(iAnalyzeSilenceFileName, :margin => @MusicMasterConf[:Clean][:MarginSilenceThresholds])
         # Get the thresholds with the recorded DC offset, and prepare them to be given to wsk
         lLstStrSilenceThresholdsWithDC = shiftThresholdsByDCOffset(lSilenceThresholds, lDCOffsets).map { |iSilenceThresholdInfo| iSilenceThresholdInfo.join(',') }
 
         # Call wsk
-        wsk(iRecordedFileName, iTask.name, 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{$MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iFFTProfileSilenceFileName}\"")
+        wsk(iRecordedFileName, iTask.name, 'SilenceRemover', "--silencethreshold \"#{lLstStrSilenceThresholdsWithDC.join('|')}\" --attack 0 --release #{@MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iFFTProfileSilenceFileName}\"")
       end
 
       # Cut the file if needed
@@ -787,9 +787,9 @@ module MusicMaster
         # Prerequisites list has been setup by the first prerequisite execution
         iSourceFileName, iRecordedAnalysisFileName, iSilenceAnalysisFileName, iSilenceFFTProfileFileName = iTask.prerequisites[1..4]
         # Get thresholds (without DC offsets) from the silence file
-        lSilenceThresholds = getThresholds(iSilenceAnalysisFileName, :margin => $MusicMasterConf[:Clean][:MarginSilenceThresholds])
+        lSilenceThresholds = getThresholds(iSilenceAnalysisFileName, :margin => @MusicMasterConf[:Clean][:MarginSilenceThresholds])
         lLstStrSilenceThresholds = lSilenceThresholds.map { |iThreshold| iThreshold.join(',') }
-        wsk(iSourceFileName, iTask.name, 'NoiseGate', "--silencethreshold \"#{lLstStrSilenceThresholds.join('|')}\" --attack #{$MusicMasterConf[:Clean][:Attack]} --release #{$MusicMasterConf[:Clean][:Release]} --silencemin #{$MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iSilenceFFTProfileFileName}\"")
+        wsk(iSourceFileName, iTask.name, 'NoiseGate', "--silencethreshold \"#{lLstStrSilenceThresholds.join('|')}\" --attack #{@MusicMasterConf[:Clean][:Attack]} --release #{@MusicMasterConf[:Clean][:Release]} --silencemin #{@MusicMasterConf[:Clean][:SilenceMin]} --noisefft \"#{iSilenceFFTProfileFileName}\"")
       end
 
       # Create embracing task
@@ -825,6 +825,8 @@ module MusicMaster
         lProcessName = iProcessInfo[:Name]
         lProcessParams = iProcessInfo.clone.delete_if { |iKey, iValue| (iKey == :Name) }
         access_plugin('Processes', lProcessName) do |ioActionPlugin|
+          # Set the MusicMaster configuration as an instance variable of the plugin also
+          ioActionPlugin.instance_variable_set(:@MusicMasterConf, @MusicMasterConf)
           # Add Utils to the plugin namespace
           ioActionPlugin.class.module_eval('include MusicMaster::Utils')
           lCurrentFileName = rLastFileName
@@ -990,8 +992,10 @@ module MusicMaster
 
       # Call the format plugin
       access_plugin('Formats', lFormatConf[:FileFormat]) do |iFormatPlugin|
+        # Set the MusicMaster configuration as an instance variable of the plugin also
+        iFormatPlugin.instance_variable_set(:@MusicMasterConf, @MusicMasterConf)
         # Create the final filename
-        # TODO: On Windows, when the format plugin create a symbolic link, this target has a different name. Should create a virtual target storing the real name. Otherwise it will be always invoked every time. Another solution could be to touch the real file name in case of shortcut.
+        # TODO: On Windows, when the format plugin creates a symbolic link, this target has a different name. Should create a virtual target storing the real name. Otherwise it will be always invoked every time.
         lDeliverableFileName = "#{getDeliverDir}/#{get_valid_file_name(iDeliverableName)}/#{replace_vars(lMetadata[:FileName], lMetadata)}.#{iFormatPlugin.getFileExt}"
         # Get the name of the mix file using the target computing it
         lFinalMixTarget = "FinalMix_#{lDeliverableConf[:Mix]}".to_sym

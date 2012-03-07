@@ -5,11 +5,6 @@
   # Uncomment the following to generate real Wave files if there is a working WSK installation
   #:WSKCmdLine => "WSK.rb",
 
-  # Command line to run Sample Rate Converter tool
-  :SRCCmdLine => "ruby -w #{ENV['MMT_ROOTPATH']}/test/FakeSSRC.rb",
-  # Uncomment the following to convert real Wave files if there is a working SSRC installation
-  #:WSKCmdLine => "WSK.rb",
-
   # Directories used
   :Directories => {
 
@@ -85,6 +80,18 @@
     :Attack => '0.1s',
     :Release => '0.1s',
     :SilenceMin => '1s'
+
+  },
+
+  # Options used by delivery formats
+  :Formats => {
+
+    'Wave' => {
+      # Command line to run Sample Rate Converter tool
+      :SRCCmdLine => "ruby -w #{ENV['MMT_ROOTPATH']}/test/FakeSSRC.rb"
+      # Uncomment the following to convert real Wave files if there is a working SSRC installation
+      #:SRCCmdLine => "ssrc"
+    }
 
   }
 

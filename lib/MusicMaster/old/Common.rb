@@ -92,7 +92,7 @@ module MusicMaster
         end
       end
       FileUtils::mkdir_p(File.dirname(iDstFile))
-      lCmd = "#{$MusicMasterConf[:SRCCmdLine]} #{lTranslatedParams.join(' ')} \"#{iSrcFile}\" \"#{iDstFile}\""
+      lCmd = "#{@MusicMasterConf[:SRCCmdLine]} #{lTranslatedParams.join(' ')} \"#{iSrcFile}\" \"#{iDstFile}\""
       log_info "=> #{lCmd}"
       system(lCmd)
     end

@@ -67,7 +67,7 @@ module MusicMaster
               log_warn "Unknown Wave format parameter: #{iParam} (value #{iValue.inspect}). Ignoring it."
             end
           end
-          lCmd = "#{$MusicMasterConf[:SRCCmdLine]} #{lTranslatedParams.sort.join(' ')} \"#{iSrcFileName}\" \"#{iDstFileName}\""
+          lCmd = "#{@MusicMasterConf[:Formats]['Wave'][:SRCCmdLine]} #{lTranslatedParams.sort.join(' ')} \"#{iSrcFileName}\" \"#{iDstFileName}\""
           log_info "=> #{lCmd}"
           raise "Error while executing SSRC command \"#{lCmd}\": error code #{$?.exitstatus}" if (!system(lCmd)) or ($?.exitstatus != 0)
         end

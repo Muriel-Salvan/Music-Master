@@ -24,7 +24,7 @@ module MusicMaster
     else
       iConf[:Tracks].each_with_index do |iTrackInfo, iIdxTrack|
         log_info "===== Mastering Track #{iIdxTrack}: #{iTrackInfo[:TrackID]} version #{iTrackInfo[:Version]} ====="
-        lAlbumFile = "#{$MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav"
+        lAlbumFile = "#{@MusicMasterConf[:Album][:Dir]}/#{iIdxTrack}_#{iTrackInfo[:TrackID]}.wav"
         lCancel = false
         if (File.exists?(lAlbumFile))
           puts "File #{lAlbumFile} already exists. Overwrite it by mastering a new one ? [y='yes']"
@@ -32,7 +32,7 @@ module MusicMaster
         end
         if (!lCancel)
           # Find the last Master file for this Track
-          lMasterFiles = Dir.glob("#{lTracksDir}/#{iTrackInfo[:TrackID]}*/#{iTrackInfo[:Version]}/#{iConf[:TracksFilesSubDir]}#{$MusicMasterConf[:Master][:Dir]}/*.wav")
+          lMasterFiles = Dir.glob("#{lTracksDir}/#{iTrackInfo[:TrackID]}*/#{iTrackInfo[:Version]}/#{iConf[:TracksFilesSubDir]}#{@MusicMasterConf[:Master][:Dir]}/*.wav")
           if (lMasterFiles.empty?)
             log_err "No Master files found for Track #{iTrackInfo[:TrackID]} version #{iTrackInfo[:Version]}"
           else
@@ -43,7 +43,7 @@ module MusicMaster
             log_info "Copying Master file to #{lAlbumFile} ..."
             FileUtils::cp(lFinalMasterFileName, lAlbumFile)
             if (iTrackInfo[:AdditionalMastering] != nil)
-              lMasterTempDir = "#{$MusicMasterConf[:Album][:TempDir]}/#{iTrackInfo[:TrackID]}.#{iTrackInfo[:Version]}"
+              lMasterTempDir = "#{@MusicMasterConf[:Album][:TempDir]}/#{iTrackInfo[:TrackID]}.#{iTrackInfo[:Version]}"
               FileUtils::mkdir_p(lMasterTempDir)
               MusicMaster::applyProcesses(iTrackInfo[:AdditionalMastering], lAlbumFile, lMasterTempDir)
             end
@@ -68,14 +68,14 @@ elsif (!File.exists?(lConfFile))
   rErrorCode = 2
 else
   MusicMaster::parsePlugins
-  FileUtils::mkdir_p($MusicMasterConf[:Album][:Dir])
-  FileUtils::mkdir_p($MusicMasterConf[:Album][:TempDir])
+  FileUtils::mkdir_p(@MusicMasterConf[:Album][:Dir])
+  FileUtils::mkdir_p(@MusicMasterConf[:Album][:TempDir])
   lConf = nil
   File.open(lConfFile, 'r') do |iFile|
     lConf = eval(iFile.read)
   end
   MusicMaster::execute(lConf)
-  log_info "===== Album finished in #{$MusicMasterConf[:Album][:Dir]}"
+  log_info "===== Album finished in #{@MusicMasterConf[:Album][:Dir]}"
 end
 
 exit rErrorCode

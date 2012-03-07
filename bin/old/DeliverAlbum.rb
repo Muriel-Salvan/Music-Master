@@ -27,7 +27,7 @@ module MusicMaster
       else
         iConf[:Tracks].each_with_index do |iTrackInfo, iIdxTrack|
           lBaseFileName = "#{iIdxTrack}_#{iTrackInfo[:TrackID]}"
-          lSourceFile = "#{$MusicMasterConf[:Album][:Dir]}/#{lBaseFileName}.wav"
+          lSourceFile = "#{@MusicMasterConf[:Album][:Dir]}/#{lBaseFileName}.wav"
           if (!File.exists?(lSourceFile))
             log_err "Missing file #{lSourceFile}"
           else
@@ -37,7 +37,7 @@ module MusicMaster
                   (iDeliveryConf[:FileFormat] == :MP3))
                 lExt = 'mp3'
               end
-              MusicMaster::src(lSourceFile, "#{$MusicMasterConf[:AlbumDeliver][:Dir]}/#{iDeliveryName}/#{lBaseFileName}.#{lExt}", iDeliveryConf)
+              MusicMaster::src(lSourceFile, "#{@MusicMasterConf[:AlbumDeliver][:Dir]}/#{iDeliveryName}/#{lBaseFileName}.#{lExt}", iDeliveryConf)
             end
           end
         end
@@ -56,13 +56,13 @@ elsif (!File.exists?(lConfFile))
   log_err "File #{lConfFile} does not exist."
   rErrorCode = 2
 else
-  FileUtils::mkdir_p($MusicMasterConf[:AlbumDeliver][:Dir])
+  FileUtils::mkdir_p(@MusicMasterConf[:AlbumDeliver][:Dir])
   lConf = nil
   File.open(lConfFile, 'r') do |iFile|
     lConf = eval(iFile.read)
   end
   MusicMaster::execute(lConf)
-  log_info "===== Album delivered in #{$MusicMasterConf[:AlbumDeliver][:Dir]}"
+  log_info "===== Album delivered in #{@MusicMasterConf[:AlbumDeliver][:Dir]}"
 end
 
 exit rErrorCode

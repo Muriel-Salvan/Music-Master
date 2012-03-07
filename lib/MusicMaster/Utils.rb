@@ -50,7 +50,7 @@ module MusicMaster
           lTryAgain = false
         else
           # Get the recorded file name
-          lFileName = $MusicMasterConf[:Record][:RecordedFileGetter].call
+          lFileName = @MusicMasterConf[:Record][:RecordedFileGetter].call
           if (!File.exists?(lFileName))
             log_err "File #{lFileName} does not exist. Could not get recorded file."
           else
@@ -449,7 +449,7 @@ module MusicMaster
       log_info ''
       log_info "========== Processing #{iInputFile} ==#{iAction}==> #{iOutputFile} | #{iParams} ..."
       FileUtils::mkdir_p(File.dirname(iOutputFile))
-      lCmd = "#{$MusicMasterConf[:WSKCmdLine]} --input \"#{iInputFile}\" --output \"#{iOutputFile}\" --action #{iAction} -- #{iParams}"
+      lCmd = "#{@MusicMasterConf[:WSKCmdLine]} --input \"#{iInputFile}\" --output \"#{iOutputFile}\" --action #{iAction} -- #{iParams}"
       log_debug "#{Dir.getwd}> #{lCmd}"
       system(lCmd)
       lErrorCode = $?.exitstatus
