@@ -1,0 +1,24 @@
+PATH
+  remote: .
+  specs:
+    MusicMaster (0.0.1)
+      WaveSwissKnife (>= 0.0.1)
+      rUtilAnts (>= 1.0)
+      rake (~> 0.9)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ProcessPilot (2.0.0.20120301)
+      rUtilAnts (>= 1.0)
+    WaveSwissKnife (0.3.1.20130103)
+      rUtilAnts (>= 1.0)
+    rUtilAnts (1.0.1.20130320)
+    rake (0.9.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  MusicMaster!
+  ProcessPilot

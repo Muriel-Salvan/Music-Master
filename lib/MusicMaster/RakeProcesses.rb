@@ -696,7 +696,7 @@ module MusicMaster
         iRecordedFileName, iAnalyzeRecordedFileName, iFFTProfileSilenceFileName, iAnalyzeSilenceFileName = iTask.prerequisites
 
         # Get DC offset from the recorded file
-        lOffset, lDCOffsets = getDCOffsets(iAnalyzeRecordedFileName)
+        _, lDCOffsets = getDCOffsets(iAnalyzeRecordedFileName)
         # Get thresholds (without DC offsets) from the silence file
         lSilenceThresholds = getThresholds(iAnalyzeSilenceFileName, :margin => @MusicMasterConf[:Clean][:MarginSilenceThresholds])
         # Get the thresholds with the recorded DC offset, and prepare them to be given to wsk
@@ -733,14 +733,14 @@ module MusicMaster
         lOffset, lDCOffsets = getDCOffsets(lRecordedAnalysisFileName)
         lSourceFileName = nil
         if (lOffset)
-          log_debug "Noise gated file #{lNoiseGatedFileName} will depend on a DC shifted recording."
+          log_debug "Noise gated file #{lNoiseGatedFileName} will depend on a DC shifted recording. DC offsets: #{lDCOffsets.inspect}"
           lSourceFileName = @Context[:CleanFiles][lBaseName][:DCRemovedFileName]
           # Create the corresponding task removing the DC offset
 
           desc "Remove DC offset from file #{lRecordedAnalysisFileName}"
           file lSourceFileName => [ lRecordedAnalysisFileName, @Context[:CleanFiles][lBaseName][:FramedFileName] ] do |iDCRemoveTask|
             iRecordedAnalysisFileName, iFramedFileName = iDCRemoveTask.prerequisites
-            lOffset2, lDCOffsets2 = getDCOffsets(iRecordedAnalysisFileName)
+            _, lDCOffsets2 = getDCOffsets(iRecordedAnalysisFileName)
             wsk(iFramedFileName, iDCRemoveTask.name, 'DCShifter', "--offset \"#{lDCOffsets2.map { |iValue| -iValue }.join('|')}\"")
           end
 
@@ -764,7 +764,7 @@ module MusicMaster
       desc "Apply Noise Gate to recorded file based on #{iBaseName}"
       file lNoiseGatedFileName => lDependenciesNoiseGateTaskName do |iTask|
         # Prerequisites list has been setup by the first prerequisite execution
-        iSourceFileName, iRecordedAnalysisFileName, iSilenceAnalysisFileName, iSilenceFFTProfileFileName = iTask.prerequisites[1..4]
+        iSourceFileName, _, iSilenceAnalysisFileName, iSilenceFFTProfileFileName = iTask.prerequisites[1..4]
         # Get thresholds (without DC offsets) from the silence file
         lSilenceThresholds = getThresholds(iSilenceAnalysisFileName, :margin => @MusicMasterConf[:Clean][:MarginSilenceThresholds])
         lLstStrSilenceThresholds = lSilenceThresholds.map { |iThreshold| iThreshold.join(',') }

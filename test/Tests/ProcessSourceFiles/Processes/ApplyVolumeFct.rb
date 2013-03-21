@@ -25,10 +25,10 @@ module MusicMasterTest
                           :Function => {
                             :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
                             :MinValue => 0,
-                            :MaxValue => 10,
+                            :MaxValue => 1,
                             :Points => {
                               0 => 0,
-                              1 => 10
+                              1 => 1
                             }
                           },
                           :Begin => '0.1s',
@@ -41,7 +41,7 @@ module MusicMasterTest
                 }
               },
               :PrepareFiles => [
-                [ 'Wave/Empty.wav', 'Wave.wav' ]
+                [ 'Wave/Sine1s.wav', 'Wave.wav' ]
               ],
               :FakeWSK => [
                 {
@@ -49,18 +49,18 @@ module MusicMasterTest
                   :Output => /04_Process\/Wave\/Wave\.0\.ApplyVolumeFct\.[[:xdigit:]]{32,32}\.wav/,
                   :Action => 'ApplyVolumeFct',
                   :Params => [ '--function', './Wave.fct.rb', '--begin', '0.1s', '--end', '0.9s', '--unitdb', '0' ],
-                  :UseWave => 'Empty.wav'
+                  :UseWave => 'Sine1s.wav'
                 }
             ]) do |iStdOUTLog, iStdERRLog, iExitStatus|
               assert_exitstatus 0, iExitStatus
               getFileFromGlob('04_Process/Wave/Wave.0.ApplyVolumeFct.????????????????????????????????.wav')
               assert_rb_content({
                 :MinValue => 0,
-                :MaxValue => 10,
+                :MaxValue => 1,
                 :FunctionType => WSK::Functions::FCTTYPE_PIECEWISE_LINEAR,
                 :Points => [
                   [ Rational(0, 1), Rational(0, 1) ],
-                  [ Rational(1, 1), Rational(10, 1) ]
+                  [ Rational(1, 1), Rational(1, 1) ]
                 ]
               }, 'Wave.fct.rb')
             end

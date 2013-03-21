@@ -10,7 +10,7 @@ module MusicMaster
   module Processes
 
     class Compressor
-      
+
       # Parameters of this process:
       # * *:DBUnits* (_Boolean_): Are units in DB format ? [optional = false]
       # * *:Threshold* (_Float_): The threshold below which there is no compression (in DB if :DBUnit is true, else in a [0..1] scale)
@@ -138,13 +138,13 @@ module MusicMaster
                 end
               end
             end
-            
+
             #dumpDebugFct(iInputFileName, lProfileFunction, 'ProfileDB', lDBUnits, iTempDir)
 
             # Clone the profile function before applying the map
             lNewProfileFunction = WSK::Functions::Function.new
             lNewProfileFunction.set(lProfileFunction.function_data.clone)
-            
+
             # Transform the Profile function with the Compressor function
             log_info 'Apply compressor transfer function ...'
             lNewProfileFunction.apply_map_function(lCompressorFunction)
@@ -200,9 +200,9 @@ module MusicMaster
             else
               lDiffProfileFunction.apply_damping(lReleaseSlope, -lAttackSlope)
             end
-            
+
             #dumpDebugFct(iInputFileName, lDiffProfileFunction, 'DampedDiffProfileDB', lDBUnits, iTempDir)
-            
+
             # Eliminate glitches in the function.
             # This is done by deleting intermediate abscisses that are too close to each other
 
@@ -241,7 +241,7 @@ module MusicMaster
         lRoundedFunction.write_to_file("#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb", :Floats => true)
         wsk(iInputFileName, "#{iTempDir}/_#{lBaseFileName}_#{iName}.wav", 'DrawFct', "--function \"#{iTempDir}/_#{lBaseFileName}_#{iName}.fct.rb\" --unitdb #{iDBUnits ? '1' : '0'}")
       end
-      
+
     end
 
   end

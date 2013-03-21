@@ -40,7 +40,8 @@ RubyPackager::ReleaseInfo.new.
     :has_rdoc => true,
     :test_file => 'test/run.rb',
     :gem_dependencies => [
-      [ 'rake', '>= 0.9' ],
+      # TODO: Use Rake 10 as soon as it behaves correctly
+      [ 'rake', '~> 0.9' ],
       [ 'rUtilAnts', '>= 1.0' ],
       [ 'WaveSwissKnife', '>= 0.0.1' ]
     ]

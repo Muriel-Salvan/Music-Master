@@ -449,6 +449,8 @@ module MusicMaster
       log_info ''
       log_info "========== Processing #{iInputFile} ==#{iAction}==> #{iOutputFile} | #{iParams} ..."
       FileUtils::mkdir_p(File.dirname(iOutputFile))
+      # If the file already exists, delete it
+      File.unlink(iOutputFile) if File.exists?(iOutputFile)
       lCmd = "#{@MusicMasterConf[:WSKCmdLine]} --input \"#{iInputFile}\" --output \"#{iOutputFile}\" --action #{iAction} -- #{iParams}"
       log_debug "#{Dir.getwd}> #{lCmd}"
       system(lCmd)

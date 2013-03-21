@@ -208,7 +208,7 @@ module MusicMaster
       return "#{getCleanedDir}/#{iBaseName}.04.NoiseGate.wav"
     end
 
-    # Get the name of a file to processed
+    # Get the name of a file to be processed
     #
     # Parameters::
     # * *iDir* (_String_): Directory where to store the processed file

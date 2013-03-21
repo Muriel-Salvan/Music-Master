@@ -88,6 +88,7 @@ module MusicMaster
                 if (lError == nil)
                   if debug_activated?
                     Rake::application.options.trace = true
+                    Rake::application.options.trace_output = $stdout
                     displayRakeTasks
                   end
                   begin
@@ -96,6 +97,7 @@ module MusicMaster
                     lError = $!
                   end
                   log_info 'Processed finished successfully.' if (lError == nil)
+                  displayRakeTasks if debug_activated?
                 end
               end
             end
