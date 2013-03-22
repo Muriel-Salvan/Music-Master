@@ -11,7 +11,7 @@ GEM
   specs:
     ProcessPilot (2.0.0.20120301)
       rUtilAnts (>= 1.0)
-    WaveSwissKnife (0.3.1.20130103)
+    WaveSwissKnife (0.4.0.20130322)
       rUtilAnts (>= 1.0)
     rUtilAnts (1.0.1.20130320)
     rake (0.9.6)
