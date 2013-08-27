@@ -1,8 +1,3 @@
-#--
-# Copyright (c) 2012 Muriel Salvan (muriel@x-aeon.com)
-# Licensed under the terms specified in LICENSE file. No warranty is provided.
-#++
-
 puts "Fake WSK invoked: #{ARGV.inspect}"
 
 def fail(iStr)

@@ -1,8 +1,3 @@
-#--
-# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
-# Licensed under the terms specified in LICENSE file. No warranty is provided.
-#++
-
 require 'WSK/Common'
 
 module MusicMaster
@@ -18,7 +13,7 @@ module MusicMaster
       # * *:DBUnits* (_Boolean_): Are the units of the function in DB scale ? (else they are in a ratio scale).
 
       include WSK::Common
-      
+
       # Execute the process
       #
       # Parameters::

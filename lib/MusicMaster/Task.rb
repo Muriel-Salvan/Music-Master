@@ -1,8 +1,3 @@
-#--
-# Copyright (c) 2012 Muriel Salvan (muriel@x-aeon.com)
-# Licensed under the terms specified in LICENSE file. No warranty is provided.
-#++
-
 # Make prerequisites re-evaluated when changed
 module Rake
   class Task

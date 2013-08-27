@@ -1,8 +1,4 @@
 #!env ruby
-#--
-# Copyright (c) 2009 - 2012 Muriel Salvan (muriel@x-aeon.com)
-# Licensed under the terms specified in LICENSE file. No warranty is provided.
-#++
 
 # Convert a ratio value into a decibel value
 def val2db(iRatio)
@@ -35,4 +31,4 @@ else
   lDB = lArg.to_f
   puts "#{lDB}db = #{db2val(lDB)}"
 end
-  
+

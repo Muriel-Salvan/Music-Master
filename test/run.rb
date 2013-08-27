@@ -1,8 +1,3 @@
-#--
-# Copyright (c) 2011 - 2012 Muriel Salvan (muriel@x-aeon.com)
-# Licensed under the terms specified in LICENSE file. No warranty is provided.
-#++
-
 # Set to true to activate more verbose logging and to not clean repositories
 $MusicMasterTest_Debug = false
 
