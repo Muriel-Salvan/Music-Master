@@ -1,5 +1,14 @@
 = MusicMaster Release History
 
+== 1.0.1.20130827 (Beta)
+
+* Removed useless copyrights
+* Changed dependency on rUtilAnts to version >= 2.0
+* Migrated to new rUtilAnts API
+* Use last version of WSK
+* Added support for Travis
+* Added Releases among directories to ignore.
+
 == 1.0.0.20120307 (Beta)
 
 * No more global variable to store the configuration.
