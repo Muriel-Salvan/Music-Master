@@ -88,7 +88,7 @@ module Test
             if (iSrcName[0..0] == '*')
               # Create a shortcut
               log_debug "Create Shortcut #{iSrcName[1..-1]} => #{iDstName}"
-              createShortcut(iSrcName[1..-1], iDstName)
+              create_shortcut(iSrcName[1..-1], iDstName)
             else
               # Copy the file
               log_debug "Copy file #{lRootPath}/test/#{iSrcName} => #{iDstName}"
@@ -144,7 +144,7 @@ module Test
             lPrepareFiles.each do |iFileInfo|
               iSrcName, iDstName = iFileInfo
               if (iSrcName[0..0] == '*')
-                File.unlink(getShortcutFileName(iDstName))
+                File.unlink(get_shortcut_file_name(iDstName))
               else
                 File.unlink(iDstName)
               end
@@ -478,7 +478,7 @@ module Test
       # * *iReferenceBaseName* (_String_): The reference Wave base name
       # * *iWaveFileName* (_String_): The wave file to check
       def assert_wave_lnk(iReferenceBaseName, iWaveFileName)
-        lRealFileName = followShortcut(iWaveFileName)
+        lRealFileName = get_shortcut_target(iWaveFileName)
         assert File.exists?(lRealFileName), "File #{lRealFileName}, pointed by shortcut #{iWaveFileName}, does not exist"
         assert_wave iReferenceBaseName, lRealFileName
       end

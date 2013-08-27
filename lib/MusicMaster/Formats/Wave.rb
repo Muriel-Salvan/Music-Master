@@ -51,7 +51,7 @@ module MusicMaster
         end
         if (lShortcut)
           # Just create a shortcut
-          createShortcut(iSrcFileName, iDstFileName)
+          create_shortcut(iSrcFileName, iDstFileName)
         else
           # We need to convert the Wave file: call SSRC
           lTranslatedParams = [ '--profile standard', '--twopass' ]

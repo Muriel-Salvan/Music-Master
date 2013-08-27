@@ -839,7 +839,7 @@ module MusicMaster
         lDependenciesTarget = "Dependencies_Mix_#{iMixName}".to_sym
         lFinalMixTask = "FinalMix_#{iMixName}".to_sym
         # Create the target being the symbolic link
-        lSymLinkFileName = getShortcutFileName(getFinalMixFileName(iMixName))
+        lSymLinkFileName = get_shortcut_file_name(getFinalMixFileName(iMixName))
 
         desc "Mix #{iMixName}"
         task rTarget => lSymLinkFileName
@@ -849,7 +849,7 @@ module MusicMaster
           # Get the mix name from the name of the Dependencies target
           lMixName = iTask.prerequisites[0].to_s.match(/^Dependencies_Mix_(.*)$/)[1]
           FileUtils::mkdir_p(File.dirname(iTask.name))
-          createShortcut(iTask.prerequisites[1], getFinalMixFileName(lMixName))
+          create_shortcut(iTask.prerequisites[1], getFinalMixFileName(lMixName))
         end
 
         desc "Dependencies needed to mix #{iMixName}"
@@ -857,7 +857,7 @@ module MusicMaster
           lMixName = iTask.name.match(/^Dependencies_Mix_(.*)$/)[1]
 
           # Modify the dependencies of the symbolic link
-          Rake::Task[getShortcutFileName(getFinalMixFileName(lMixName))].prerequisites.replace([
+          Rake::Task[get_shortcut_file_name(getFinalMixFileName(lMixName))].prerequisites.replace([
             iTask.name,
             Rake::Task[iTask.prerequisites.first].data[:FileName]
           ])
