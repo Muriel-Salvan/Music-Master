@@ -42,7 +42,7 @@ RubyPackager::ReleaseInfo.new.
     :gem_dependencies => [
       # TODO: Use Rake 10 as soon as it behaves correctly
       [ 'rake', '~> 0.9' ],
-      [ 'rUtilAnts', '>= 1.0' ],
+      [ 'rUtilAnts', '>= 2.0' ],
       [ 'WaveSwissKnife', '>= 0.0.1' ]
     ]
   ).

@@ -3,7 +3,7 @@ PATH
   specs:
     MusicMaster (0.0.1)
       WaveSwissKnife (>= 0.0.1)
-      rUtilAnts (>= 1.0)
+      rUtilAnts (>= 2.0)
       rake (~> 0.9)
 
 GEM
@@ -13,7 +13,7 @@ GEM
       rUtilAnts (>= 1.0)
     WaveSwissKnife (0.4.0.20130322)
       rUtilAnts (>= 1.0)
-    rUtilAnts (1.0.1.20130320)
+    rUtilAnts (2.0.0.20130827)
     rake (0.9.6)
 
 PLATFORMS
